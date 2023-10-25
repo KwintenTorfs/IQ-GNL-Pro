@@ -31,8 +31,6 @@ sg.set_options(scaling=scaling)
 sg.theme('GNL GUI Theme')
 
 # Current Values
-filename = default_file_text
-folder = default_folder
 save_type = valid_save_files[0]
 
 
@@ -73,7 +71,8 @@ while True:
     print(window, event, value)
     if event in [sg.WIN_CLOSED, 'Exit', '+ESCAPE+']:
         if window == window_main:
-            close_program, filename, folder, save_type, save = sure_you_want_to_close(filename, folder, save_type)
+            window_main.DisableClose = True
+            close_program, save = sure_you_want_to_close()
             if close_program:
                 window.close()
                 if window_export:
@@ -85,6 +84,7 @@ while True:
                 if window_folders:
                     window_folders.close()
                 break
+            window_main.DisableClose = False
         elif window == window_export:
             window.close()
             window_export = None
