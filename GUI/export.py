@@ -275,6 +275,7 @@ def export_events(window, event, value):
         set_all_parameters(window, study_parameters, True)
         set_all_parameters(window, scanner_parameters, True)
         set_all_parameters(window, slice_parameters, True)
+        set_all_parameters(window, tissue_parameters, True)
     elif event == 'REJECT SLICE':
         set_all_parameters(window, slice_parameters, False)
     elif event == 'REJECT PATIENTS':
@@ -290,6 +291,7 @@ def export_events(window, event, value):
         set_all_parameters(window, study_parameters, False)
         set_all_parameters(window, scanner_parameters, False)
         set_all_parameters(window, slice_parameters, False)
+        set_all_parameters(window, tissue_parameters, False)
     return
 
 

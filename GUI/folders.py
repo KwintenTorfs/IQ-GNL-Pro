@@ -1,3 +1,5 @@
+import os.path
+
 import PySimpleGUI as sg
 
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, light_accent, \
@@ -5,33 +7,44 @@ from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text,
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.4 * window_size[0]), int(0.55 * window_size[1]))
+column_size = (20, 1)
 folders_parameters = {'DB': True,
                       'SCAN': False,
                       'IMAGE': False,
                       'DB LOCATION': '',
                       'SCAN LOCATION': '',
                       'IMAGE LOCATION': '',
-                      'DB FILES': [],
-                      'SCAN FILES': [],
-                      'IMAGE FILES': []}
+                      'DB FILES': [[], []],
+                      'SCAN FILES': [[], []],
+                      'IMAGE FILES': [[], []]}
+
+
+def files_for_display(files):
+    display_files = []
+    for file in files:
+        display_files.append(os.path.basename(file))
+    return display_files
 
 
 def folders_layout():
     global folders_parameters
     column_left = [[sg.Radio('Database', key='DB', group_id='EXPERIMENT', enable_events=True,
                              default=folders_parameters['DB'])],
-                   [sg.Listbox(values=folders_parameters['DB FILES'], enable_events=True, expand_x=True, expand_y=True,
-                               key='DB FILES')]]
+                   [sg.Listbox(values=folders_parameters['DB FILES'][1], enable_events=True,
+                               expand_x=True, expand_y=True, key='DB FILES', size=column_size,
+                               highlight_background_color=light_accent, highlight_text_color=text)]]
 
     column_middle = [[sg.Radio('Scans', key='SCAN', group_id='EXPERIMENT', enable_events=True,
                                default=folders_parameters['SCAN'])],
-                     [sg.Listbox(values=folders_parameters['SCAN FILES'], enable_events=True, expand_x=True,
-                                 expand_y=True, key='SCAN FILES')]]
+                     [sg.Listbox(values=folders_parameters['SCAN FILES'][1], enable_events=True,
+                                 expand_x=True, expand_y=True, key='SCAN FILES', size=column_size,
+                                 highlight_background_color=light_accent, highlight_text_color=text)]]
 
     column_right = [[sg.Radio('Images', key='IMAGE', group_id='EXPERIMENT', enable_events=True,
                               default=folders_parameters['IMAGE'])],
-                    [sg.Listbox(values=folders_parameters['IMAGE FILES'], enable_events=True, expand_x=True,
-                                expand_y=True, key='IMAGE FILES')]]
+                    [sg.Listbox(values=folders_parameters['IMAGE FILES'][1], enable_events=True,
+                                expand_x=True, expand_y=True, key='IMAGE FILES', size=column_size,
+                                highlight_background_color=light_accent, highlight_text_color=text)]]
 
     layout_db = [[sg.Text('Source folder', font=TextFont, text_color=text, justification='left')],
                  [sg.Input(key='DB LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
@@ -96,9 +109,9 @@ def create_folders_window():
 
 def set_lists(window, db, scan, image):
     global folders_parameters
-    window['DB FILES'].update(disabled=not db, values=folders_parameters['DB FILES'])
-    window['SCAN FILES'].update(disabled=not scan, values=folders_parameters['SCAN FILES'])
-    window['IMAGE FILES'].update(disabled=not image, values=folders_parameters['IMAGE FILES'])
+    window['DB FILES'].update(disabled=not db, values=folders_parameters['DB FILES'][1])
+    window['SCAN FILES'].update(disabled=not scan, values=folders_parameters['SCAN FILES'][1])
+    window['IMAGE FILES'].update(disabled=not image, values=folders_parameters['IMAGE FILES'][1])
     folders_parameters['DB'] = window['DB'].get()
     folders_parameters['SCAN'] = window['SCAN'].get()
     folders_parameters['IMAGE'] = window['IMAGE'].get()
@@ -112,6 +125,8 @@ def set_browse(window):
 
 def folders_events(window, event, value):
     global folders_parameters
+    print(folders_parameters['DB FILES'])
+    print(window['DB FILES'].get())
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
 
@@ -133,13 +148,28 @@ def folders_events(window, event, value):
         files = '%s FILES' % data_type
         loc = '%s LOCATION' % data_type
         location = window[loc].get()
-        if location != '':
-            folders_parameters[files].append(location)
-            window[files].update(values=folders_parameters[files])
-            # todo find way to add values to correct list
-            # todo add way to check if link is real list
-            folders_parameters[loc] = ''
-            window[loc].update(folders_parameters[loc])
+        if location != '' and (os.path.isdir(location) or os.path.isfile(location)):
+            if location not in folders_parameters[files][0]:
+                folders_parameters[files][0].append(location)
+                folders_parameters[files][1].append(os.path.basename(location))
+                window[files].update(values=folders_parameters[files][1])
+            else:
+                sg.popup('Already In list', auto_close=True, auto_close_duration=1, any_key_closes=True, font=TextFont,
+                         text_color=text, title='', no_titlebar=True, keep_on_top=True, background_color=light_accent,
+                         button_color=accent_button)
+        folders_parameters[loc] = ''
+        window[loc].update(folders_parameters[loc])
+
+    elif 'FILES' in event:
+        data_type = event.split(' FILES')[0]
+        selected = window[event].get()[0]
+        index = folders_parameters[event][1].index(selected)
+        current_location = folders_parameters[event][0][index]
+        if 'DB' in event and folders_parameters['DB']:
+            files_in_map = os.listdir(current_location)
+            print(files_in_map)
+            # todo find method to add the sub-lists to the other list
+
 
     elif event == 'DB':
         set_lists(window, True, True, False)
