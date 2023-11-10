@@ -3,26 +3,11 @@ import PySimpleGUI as sg
 from GUI.export import create_export_window, export_events
 from GUI.folders import create_folders_window, folders_events
 from GUI.gnl import create_gnl_window, gnl_events
-from GUI.exit_screen import sure_you_want_to_close, valid_save_files, default_file_text, \
-    default_folder
-from Constants.design_GUI import my_width, my_height
+from GUI.exit_screen import sure_you_want_to_close, valid_save_files
+from Constants.design_GUI import my_width, my_height, scaling, width, height
 from GUI.technique import create_technique_window, technique_events
 from configuration import GUI_ICON
 
-
-def get_scaling():
-    # called before window created
-    root = sg.tk.Tk()
-    scaling_factor = root.winfo_fpixels('1i')/72
-    root.destroy()
-    return scaling_factor
-
-
-# Get the number for new screen
-scaling_old = get_scaling()
-width, height = sg.Window.get_screen_size()
-
-scaling = scaling_old * min(width / my_width, height / my_height)
 
 sg.set_options(scaling=scaling)
 

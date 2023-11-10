@@ -4,6 +4,7 @@ import PySimpleGUI as sg
 
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, light_accent, \
     default_button_hover, SmallFont, accent_button, accent_button_hover
+from GUI.popups import popup_yes_no
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.4 * window_size[0]), int(0.55 * window_size[1]))
@@ -103,6 +104,10 @@ def create_folders_window():
     window_folders['ADD SCAN'].bind('<Leave>', '+MOUSE AWAY+')
     window_folders['ADD IMAGE'].bind('<Enter>', '+MOUSE OVER+')
     window_folders['ADD IMAGE'].bind('<Leave>', '+MOUSE AWAY+')
+    window_folders['DB FILES'].bind('<Delete>', '+DELETE+')
+    window_folders['SCAN FILES'].bind('<Delete>', '+DELETE+')
+    window_folders['IMAGE FILES'].bind('<Delete>', '+DELETE+')
+
     window_folders.bind('<Escape>', '+ESCAPE+')
     return window_folders
 
@@ -118,15 +123,26 @@ def set_lists(window, db, scan, image):
     set_browse(window)
 
 
+def swipe_lists(window):
+    folders_parameters['DB FILES'] = [[], []]
+    folders_parameters['SCAN FILES'] = [[], []]
+    folders_parameters['IMAGE FILES'] = [[], []]
+    set_all_lists(window)
+
+
 def set_browse(window):
     for method in ['DB', 'SCAN', 'IMAGE']:
         window['%s COLUMN' % method].update(visible=folders_parameters[method])
 
 
+def set_all_lists(window):
+    for method in ['DB', 'SCAN', 'IMAGE']:
+        files = '%s FILES' % method
+        window[files].update(values=folders_parameters[files][1])
+
+
 def folders_events(window, event, value):
     global folders_parameters
-    print(folders_parameters['DB FILES'])
-    print(window['DB FILES'].get())
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
 
@@ -152,7 +168,7 @@ def folders_events(window, event, value):
             if location not in folders_parameters[files][0]:
                 folders_parameters[files][0].append(location)
                 folders_parameters[files][1].append(os.path.basename(location))
-                window[files].update(values=folders_parameters[files][1])
+                set_all_lists(window)
             else:
                 sg.popup('Already In list', auto_close=True, auto_close_duration=1, any_key_closes=True, font=TextFont,
                          text_color=text, title='', no_titlebar=True, keep_on_top=True, background_color=light_accent,
@@ -161,20 +177,85 @@ def folders_events(window, event, value):
         window[loc].update(folders_parameters[loc])
 
     elif 'FILES' in event:
+        print(event)
         data_type = event.split(' FILES')[0]
-        selected = window[event].get()[0]
-        index = folders_parameters[event][1].index(selected)
-        current_location = folders_parameters[event][0][index]
-        if 'DB' in event and folders_parameters['DB']:
+        files = '%s FILES' % data_type
+        select_list = window[files].get()
+        print(select_list)
+        if not select_list:
+            window[files].update(set_to_index=[])
+            return
+        selected = select_list[0]
+        index = folders_parameters[files][1].index(selected)
+        current_location = folders_parameters[files][0][index]
+        if '+DELETE+' in event:
+            folders_parameters[files][1].remove(selected)
+            folders_parameters[files][0].remove(current_location)
+            window[files].update(set_to_index=[])
+            set_all_lists(window)
+        elif 'DB' in event and folders_parameters['DB']:
             files_in_map = os.listdir(current_location)
+            locations_in_map = []
+            for file in files_in_map.copy():
+                scan_location = os.path.join(current_location, file)
+                if os.path.isdir(scan_location):
+                    locations_in_map.append(scan_location)
+                else:
+                    files_in_map.remove(file)
+            window['DB FILES'].update(set_to_index=selected)
+            folders_parameters['SCAN FILES'][0] = locations_in_map
+            folders_parameters['SCAN FILES'][1] = files_in_map
+            set_all_lists(window)
+        elif 'SCAN' in event and folders_parameters['SCAN']:
+            files_in_map = os.listdir(current_location)
+            print(current_location)
             print(files_in_map)
+            locations_in_map = []
+            for file in files_in_map.copy():
+                scan_location = os.path.join(current_location, file)
+                if os.path.isfile(scan_location):
+                    locations_in_map.append(scan_location)
+                else:
+                    files_in_map.remove(file)
+            window['SCAN FILES'].update(set_to_index=selected)
+            folders_parameters['IMAGE FILES'][0] = locations_in_map
+            folders_parameters['IMAGE FILES'][1] = files_in_map
+            set_all_lists(window)
             # todo find method to add the sub-lists to the other list
 
-
     elif event == 'DB':
-        set_lists(window, True, True, False)
+        if folders_parameters['DB']:
+            return
+        else:
+            switch_method = popup_yes_no('Are you sure you want to switch methods?')
+            if switch_method:
+                swipe_lists(window)
+                set_lists(window, True, True, False)
+            else:
+                for method in ['DB', 'SCAN', 'IMAGE']:
+                    window[method].update(folders_parameters[method])
     elif event == 'SCAN':
-        set_lists(window, False, True, True)
+        if folders_parameters['SCAN']:
+            return
+        else:
+            switch_method = popup_yes_no('Are you sure you want to switch methods?')
+            if switch_method:
+                swipe_lists(window)
+                set_lists(window, False, True, True)
+            else:
+                for method in ['DB', 'SCAN', 'IMAGE']:
+                    window[method].update(folders_parameters[method])
     elif event == 'IMAGE':
-        set_lists(window, False, False, True)
+        if folders_parameters['IMAGE']:
+            return
+        else:
+            switch_method = popup_yes_no('Are you sure you want to switch methods?')
+            if switch_method:
+                swipe_lists(window)
+                set_lists(window, False, False, True)
+            else:
+                for method in ['DB', 'SCAN', 'IMAGE']:
+                    window[method].update(folders_parameters[method])
+
     return
+

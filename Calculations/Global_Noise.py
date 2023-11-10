@@ -8,6 +8,14 @@ samei_bin_width = 1
 samei_kernel = 7
 
 
+def get_kernel_in_pixel(pixel_in_mm, kernel_in_mm):
+    # For a fixed kernel size (in mm), return the kernel size in (odd) number of pixels
+    pixels_in_kernel = kernel_in_mm / pixel_in_mm
+    odd_kernels = (pixels_in_kernel - 1) / 2
+    odd_pixel_kernel = (np.round(odd_kernels, 0) * 2 + 1).astype(int)
+    return odd_pixel_kernel
+
+
 def extend_matrix_2d(matrix, radius):
     # For any convolution calculation, the matrix needs to be extended to allow convolution in the image borders
     #   Radius is the radius of the mask array (e.g. for 3x3, radius = 1)

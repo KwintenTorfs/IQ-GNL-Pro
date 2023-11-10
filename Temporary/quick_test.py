@@ -7,5 +7,6 @@ a = [[1, 2, 3], ['a', 'b', 'c']]
 
 event = 'b'
 
-i = a[1].index(event)
-print(a[0][i])
+i = a.remove(a[1])
+
+print(os.path.isfile(r'//mixer/home1/ktorfs5\$RECYCLE.BIN'))

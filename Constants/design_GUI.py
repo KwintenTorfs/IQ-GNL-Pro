@@ -2,10 +2,25 @@ import PySimpleGUI as sg
 
 program_name = r'Automatic GNL GUI'
 
+
+def get_scaling():
+    # called before window created
+    root = sg.tk.Tk()
+    scaling_factor = root.winfo_fpixels('1i')/72
+    root.destroy()
+    return scaling_factor
+
+
+# Get the number for new screen
+scaling_old = get_scaling()
+width, height = sg.Window.get_screen_size()
+
+
 # Find the number in original screen when GUI designed.
 # call sg.Window.get_screen_size()
 my_scaling = 1.334646962233169    # call get_scaling()
 my_width, my_height = (1536, 864)
+scaling = scaling_old * min(width / my_width, height / my_height)
 
 
 # GREENS
