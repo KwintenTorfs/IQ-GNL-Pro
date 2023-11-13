@@ -20,6 +20,13 @@ folders_parameters = {'DB': True,
                       'IMAGE FILES': [[], []]}
 
 
+enable_lists = {'DB': [True, True, True],
+                'SCAN': [False, True, True],
+                'IMAGE': [False, False, True]}
+
+list_methods = ['DB', 'SCAN', 'IMAGE']
+
+
 def files_for_display(files):
     display_files = []
     for file in files:
@@ -33,19 +40,22 @@ def folders_layout():
                              default=folders_parameters['DB'])],
                    [sg.Listbox(values=folders_parameters['DB FILES'][1], enable_events=True,
                                expand_x=True, expand_y=True, key='DB FILES', size=column_size,
-                               highlight_background_color=light_accent, highlight_text_color=text)]]
+                               highlight_background_color=light_accent, highlight_text_color=text,
+                               horizontal_scroll=True)]]
 
     column_middle = [[sg.Radio('Scans', key='SCAN', group_id='EXPERIMENT', enable_events=True,
                                default=folders_parameters['SCAN'])],
                      [sg.Listbox(values=folders_parameters['SCAN FILES'][1], enable_events=True,
                                  expand_x=True, expand_y=True, key='SCAN FILES', size=column_size,
-                                 highlight_background_color=light_accent, highlight_text_color=text)]]
+                                 highlight_background_color=light_accent, highlight_text_color=text,
+                                 horizontal_scroll=True)]]
 
     column_right = [[sg.Radio('Images', key='IMAGE', group_id='EXPERIMENT', enable_events=True,
                               default=folders_parameters['IMAGE'])],
                     [sg.Listbox(values=folders_parameters['IMAGE FILES'][1], enable_events=True,
                                 expand_x=True, expand_y=True, key='IMAGE FILES', size=column_size,
-                                highlight_background_color=light_accent, highlight_text_color=text)]]
+                                highlight_background_color=light_accent, highlight_text_color=text,
+                                horizontal_scroll=True)]]
 
     layout_db = [[sg.Text('Source folder', font=TextFont, text_color=text, justification='left')],
                  [sg.Input(key='DB LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
@@ -124,45 +134,49 @@ def set_lists(window, db, scan, image):
 
 
 def swipe_lists(window):
-    folders_parameters['DB FILES'] = [[], []]
-    folders_parameters['SCAN FILES'] = [[], []]
-    folders_parameters['IMAGE FILES'] = [[], []]
+    global folders_parameters
+    for method in list_methods:
+        folders_parameters['%s FILES' % method] = [[], []]
     set_all_lists(window)
 
 
 def set_browse(window):
-    for method in ['DB', 'SCAN', 'IMAGE']:
+    global folders_parameters
+    for method in list_methods:
         window['%s COLUMN' % method].update(visible=folders_parameters[method])
 
 
 def set_all_lists(window):
-    for method in ['DB', 'SCAN', 'IMAGE']:
-        files = '%s FILES' % method
+    global folders_parameters
+    for method in list_methods:
+        files = "%s FILES" % method
         window[files].update(values=folders_parameters[files][1])
 
 
 def folders_events(window, event, value):
     global folders_parameters
+
+    # If the window is closed
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
 
+    # For automatic events, involving buttons etc.
     elif 'MOUSE OVER' in event and 'FIND' in event:
         window[event.split('+MOUSE OVER+')[0]].update(button_color=default_button_hover)
     elif 'MOUSE AWAY' in event and 'FIND' in event:
         window[event.split('+MOUSE AWAY+')[0]].update(button_color=default_button)
-
     elif 'LOCATION' in event and 'MOUSE' not in event:
         window['FIND %s' % event.split(' LOCATION')[0]].update(button_color=default_button)
-
     elif 'MOUSE OVER' in event and 'ADD' in event:
         window[event.split('+MOUSE OVER+')[0]].update(button_color=accent_button_hover)
     elif 'MOUSE AWAY' in event and 'ADD' in event:
         window[event.split('+MOUSE AWAY+')[0]].update(button_color=accent_button)
 
+    # To add a new file or folder to the existing selected lists
     elif 'ADD' in event and 'MOUSE' not in event:
-        data_type = event.split('ADD ')[1]
-        files = '%s FILES' % data_type
-        loc = '%s LOCATION' % data_type
+        selected_method = event.split('ADD ')[1]
+        files = '%s FILES' % selected_method
+        loc = '%s LOCATION' % selected_method
         location = window[loc].get()
         if location != '' and (os.path.isdir(location) or os.path.isfile(location)):
             if location not in folders_parameters[files][0]:
@@ -176,23 +190,31 @@ def folders_events(window, event, value):
         folders_parameters[loc] = ''
         window[loc].update(folders_parameters[loc])
 
+    # Functions for all events concerning the individual lists
     elif 'FILES' in event:
-        print(event)
-        data_type = event.split(' FILES')[0]
-        files = '%s FILES' % data_type
-        select_list = window[files].get()
-        print(select_list)
-        if not select_list:
-            window[files].update(set_to_index=[])
+        selected_method = event.split(' FILES')[0]
+        files = '%s FILES' % selected_method
+        all_selected_indices = window[files].get_indexes()
+        if not all_selected_indices:
             return
-        selected = select_list[0]
-        index = folders_parameters[files][1].index(selected)
+        index = all_selected_indices[0]
+        selected_value = window[files].get_list_values()[index]
         current_location = folders_parameters[files][0][index]
+
+        # Operation 1 = deleting an event from the lists
         if '+DELETE+' in event:
-            folders_parameters[files][1].remove(selected)
+            if not window[selected_method].get():
+                return
+            method_index = list_methods.index(selected_method)
+            delete_lists = [method for method in list_methods if list_methods.index(method) > method_index]
+            for method in delete_lists:
+                folders_parameters['%s FILES' % method] = [[], []]
+            folders_parameters[files][1].remove(selected_value)
             folders_parameters[files][0].remove(current_location)
             window[files].update(set_to_index=[])
             set_all_lists(window)
+
+        # Operation 2 = when selecting a value in DB => shows the sub-folders in SCAN
         elif 'DB' in event and folders_parameters['DB']:
             files_in_map = os.listdir(current_location)
             locations_in_map = []
@@ -202,13 +224,14 @@ def folders_events(window, event, value):
                     locations_in_map.append(scan_location)
                 else:
                     files_in_map.remove(file)
-            window['DB FILES'].update(set_to_index=selected)
             folders_parameters['SCAN FILES'][0] = locations_in_map
             folders_parameters['SCAN FILES'][1] = files_in_map
             set_all_lists(window)
+            window['DB FILES'].update(set_to_index=index)
+
+        # Operation 3 = when selecting a value in SCAN => shows the sub-files in IMAGE
         elif 'SCAN' in event and folders_parameters['SCAN']:
             files_in_map = os.listdir(current_location)
-            print(current_location)
             print(files_in_map)
             locations_in_map = []
             for file in files_in_map.copy():
@@ -217,44 +240,23 @@ def folders_events(window, event, value):
                     locations_in_map.append(scan_location)
                 else:
                     files_in_map.remove(file)
-            window['SCAN FILES'].update(set_to_index=selected)
             folders_parameters['IMAGE FILES'][0] = locations_in_map
             folders_parameters['IMAGE FILES'][1] = files_in_map
             set_all_lists(window)
-            # todo find method to add the sub-lists to the other list
+            window['SCAN FILES'].update(set_to_index=index)
 
-    elif event == 'DB':
-        if folders_parameters['DB']:
+    # Event in case you are going to switch the method of getting slices
+    elif event in list_methods:
+        if folders_parameters[event]:
             return
         else:
             switch_method = popup_yes_no('Are you sure you want to switch methods?')
             if switch_method:
                 swipe_lists(window)
-                set_lists(window, True, True, False)
+                db, sc, im = enable_lists[event]
+                set_lists(window, db, sc, im)
             else:
-                for method in ['DB', 'SCAN', 'IMAGE']:
-                    window[method].update(folders_parameters[method])
-    elif event == 'SCAN':
-        if folders_parameters['SCAN']:
-            return
-        else:
-            switch_method = popup_yes_no('Are you sure you want to switch methods?')
-            if switch_method:
-                swipe_lists(window)
-                set_lists(window, False, True, True)
-            else:
-                for method in ['DB', 'SCAN', 'IMAGE']:
-                    window[method].update(folders_parameters[method])
-    elif event == 'IMAGE':
-        if folders_parameters['IMAGE']:
-            return
-        else:
-            switch_method = popup_yes_no('Are you sure you want to switch methods?')
-            if switch_method:
-                swipe_lists(window)
-                set_lists(window, False, False, True)
-            else:
-                for method in ['DB', 'SCAN', 'IMAGE']:
+                for method in list_methods:
                     window[method].update(folders_parameters[method])
 
     return

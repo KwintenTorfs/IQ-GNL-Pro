@@ -53,7 +53,6 @@ save_table = None
 
 while True:
     window, event, value = sg.read_all_windows()
-    print(window, event, value)
     if event in [sg.WIN_CLOSED, 'Exit', '+ESCAPE+']:
         if window == window_main:
             window_main.DisableClose = True

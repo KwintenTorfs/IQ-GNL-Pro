@@ -1,30 +1,32 @@
-# import PySimpleGUI
 import PySimpleGUI as sg
-import GUI.exit_screen
-import configuration
 
-# Choose a Theme for the Layout
-sg.theme('Test Themes 5')
+list1 = ['a', 'b', 'c']
+list2 = []
 
-layout = [[sg.Text('List of InBuilt Themes')],
-          [sg.Text('Please Choose a Theme  to see Demo window')],
-          [sg.Listbox(values=sg.theme_list(),
-                      size=(20, 12),
-                      key='-LIST-',
-                      enable_events=True)],
-          [sg.Button('Exit')]]
+layout = [[sg.Text("Demo")],
+          [sg.Listbox(values=list1, size=(30, 6), enable_events=True, key="-LIST-"),
+           sg.Button("Add", enable_events=True, key="-BUTTON-"),
+           sg.Button("Remove", enable_events=True, key="-BUTTON2-"),
+           sg.Listbox(values=list2, size=(30, 6), key="-LIST2-")],
+          [sg.Cancel("Exit")]]
 
-window = sg.Window('Theme List', layout, icon=configuration.GUI_ICON)
+window = sg.Window("Beta", layout=layout, background_color="#272533", size=(650, 450))
 
-# This is an Event Loop
 while True:
     event, values = window.read()
-
-    if event in (None, 'Exit'):
+    if event == "Exit" or event == sg.WIN_CLOSED:
         break
 
-    sg.theme(values['-LIST-'][0])
-    sg.popup_get_text('This is {}'.format(values['-LIST-'][0]))
+    if event == "-BUTTON-":
+        INDEX = int(''.join(map(str, window["-LIST-"].get_indexes())))
+        list2.append(list1.pop(INDEX))
+        window["-LIST2-"].update(list2)
+        window["-LIST-"].update(list1)
 
-# Close
+    if event == "-BUTTON2-":
+        INDEX = int(''.join(map(str, window["-LIST2-"].get_indexes())))
+        list1.append(list2.pop(INDEX))
+        window["-LIST2-"].update(list2)
+        window["-LIST-"].update(list1)
+
 window.close()
