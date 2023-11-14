@@ -1,9 +1,11 @@
 import os.path
+import threading
 
 import PySimpleGUI as sg
+import numpy as np
 
-from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, light_accent, \
-    default_button_hover, SmallFont, accent_button, accent_button_hover
+from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, \
+    light_accent, default_button_hover, accent_button, accent_button_hover
 from GUI.popups import popup_yes_no
 from configuration import GUI_ICON
 
@@ -36,6 +38,7 @@ def files_for_display(files):
 
 def folders_layout():
     global folders_parameters
+
     column_left = [[sg.Radio('Database', key='DB', group_id='EXPERIMENT', enable_events=True,
                              default=folders_parameters['DB'])],
                    [sg.Listbox(values=folders_parameters['DB FILES'][1], enable_events=True,
@@ -85,7 +88,6 @@ def folders_layout():
                     sg.Button('Add File', key='ADD IMAGE', button_color=accent_button, font=TextFont, size=(8, 1))]]
 
     layout = [[sg.Text('Select Data', font=TitleFont, text_color=accent, justification='left')],
-              [sg.Text('', font=SmallFont, text_color=text, justification='left')],
               [sg.Column(layout_db, expand_x=True, visible=folders_parameters['DB'], key='DB COLUMN'),
                sg.Column(layout_scan, expand_x=True, visible=folders_parameters['SCAN'], key='SCAN COLUMN'),
                sg.Column(layout_file, expand_x=True, visible=folders_parameters['IMAGE'], key='IMAGE COLUMN')],
@@ -96,9 +98,7 @@ def folders_layout():
     return layout
 
 
-def create_folders_window():
-    layout = folders_layout()
-    window_folders = sg.Window(title='', layout=layout, size=settings_window_size, icon=GUI_ICON, finalize=True)
+def bind_folders(window_folders):
     window_folders['DB LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
     window_folders['SCAN LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
     window_folders['IMAGE LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
@@ -117,9 +117,7 @@ def create_folders_window():
     window_folders['DB FILES'].bind('<Delete>', '+DELETE+')
     window_folders['SCAN FILES'].bind('<Delete>', '+DELETE+')
     window_folders['IMAGE FILES'].bind('<Delete>', '+DELETE+')
-
     window_folders.bind('<Escape>', '+ESCAPE+')
-    return window_folders
 
 
 def set_lists(window, db, scan, image):
@@ -153,7 +151,7 @@ def set_all_lists(window):
         window[files].update(values=folders_parameters[files][1])
 
 
-def folders_events(window, event, value):
+def folders_events(window, event, _):
     global folders_parameters
 
     # If the window is closed
@@ -177,16 +175,20 @@ def folders_events(window, event, value):
         selected_method = event.split('ADD ')[1]
         files = '%s FILES' % selected_method
         loc = '%s LOCATION' % selected_method
-        location = window[loc].get()
+        location = window[loc].get().replace('/', '\\')
+        window[event].update(button_color=accent_button)
         if location != '' and (os.path.isdir(location) or os.path.isfile(location)):
             if location not in folders_parameters[files][0]:
                 folders_parameters[files][0].append(location)
-                folders_parameters[files][1].append(os.path.basename(location))
+                folder = os.path.basename(location)
+                folders_parameters[files][1].append(folder)
                 set_all_lists(window)
             else:
                 sg.popup('Already In list', auto_close=True, auto_close_duration=1, any_key_closes=True, font=TextFont,
                          text_color=text, title='', no_titlebar=True, keep_on_top=True, background_color=light_accent,
                          button_color=accent_button)
+
+            create_sibling_folder_window(location, selected_method, window)
         folders_parameters[loc] = ''
         window[loc].update(folders_parameters[loc])
 
@@ -228,11 +230,11 @@ def folders_events(window, event, value):
             folders_parameters['SCAN FILES'][1] = files_in_map
             set_all_lists(window)
             window['DB FILES'].update(set_to_index=index)
+            window['IMAGE FILES'].update(values=[])
 
         # Operation 3 = when selecting a value in SCAN => shows the sub-files in IMAGE
-        elif 'SCAN' in event and folders_parameters['SCAN']:
+        elif 'SCAN' in event:
             files_in_map = os.listdir(current_location)
-            print(files_in_map)
             locations_in_map = []
             for file in files_in_map.copy():
                 scan_location = os.path.join(current_location, file)
@@ -261,3 +263,146 @@ def folders_events(window, event, value):
 
     return
 
+
+########################################################################################################################
+#
+# Popup with Sibling Folders
+#
+
+siblings_window_size = (int(0.2 * window_size[0]), int(0.4 * window_size[1]))
+
+
+def find_sibling_directories(selected_location, method):
+    global folders_parameters
+    files = '%s FILES' % method
+    location_list = folders_parameters[files][0]
+    parent_folder = os.path.abspath(os.path.join(selected_location, os.pardir))
+    sibling_folders, sibling_locations = [], []
+    for f in os.scandir(parent_folder):
+        if f.is_dir():
+            location = f.path
+            directory = os.path.basename(location)
+            if location not in location_list and location != selected_location:
+                sibling_folders.append(directory)
+                sibling_locations.append(location)
+    return sibling_folders, sibling_locations
+
+
+def find_sibling_files(selected_location, method):
+    global folders_parameters
+    files = '%s FILES' % method
+    location_list = folders_parameters[files][0]
+    parent_folder = os.path.abspath(os.path.join(selected_location, os.pardir))
+    sibling_folders, sibling_locations = [], []
+    for f in os.scandir(parent_folder):
+        if f.is_file():
+            location = f.path
+            directory = os.path.basename(location)
+            if location not in location_list and location != selected_location:
+                sibling_folders.append(directory)
+                sibling_locations.append(location)
+    return sibling_folders, sibling_locations
+
+
+def create_sibling_folder_window(folder, method, window):
+    global folders_parameters
+    files = '%s FILES' % method
+    parent_location = os.path.abspath(os.path.join(folder, os.pardir))
+    if method in ['DB', 'SCAN']:
+        siblings, sibling_locations = find_sibling_directories(folder, method)
+    else:
+        siblings, sibling_locations = find_sibling_files(folder, method)
+    if not sibling_locations:
+        return
+    layout = [[sg.Text('Sibling folders', font=TitleFont, text_color=accent, justification='left')],
+              [sg.Listbox(siblings, expand_x=True, expand_y=True, select_mode='multiple', key='SIBLINGS',
+                          no_scrollbar=True, horizontal_scroll=True)],
+              [sg.Push(),
+               sg.Button('Reject all', key='REJECT', font=TextFont, button_color=default_button, size=(11, 1)),
+               sg.Button('Select all', key='ALL', font=TextFont, button_color=default_button, size=(11, 1)),
+               sg.Button('Add', key='ADD', button_color=accent_button, font=TextFont, size=(5, 1))]]
+
+    window_siblings = sg.Window('', layout, finalize=True, size=siblings_window_size, icon=GUI_ICON, resizable=False,
+                                disable_minimize=True, keep_on_top=True)
+    popup_window = None
+    window_siblings['ADD'].bind('<Enter>', '+MOUSE OVER+')
+    window_siblings['ADD'].bind('<Leave>', '+MOUSE AWAY+')
+    window_siblings['ALL'].bind('<Enter>', '+MOUSE OVER+')
+    window_siblings['ALL'].bind('<Leave>', '+MOUSE AWAY+')
+    window_siblings['REJECT'].bind('<Enter>', '+MOUSE OVER+')
+    window_siblings['REJECT'].bind('<Leave>', '+MOUSE AWAY+')
+    window_siblings.bind('<Escape>', '+ESCAPE+')
+
+    window_siblings['SIBLINGS'].widget.config(selectbackground=light_accent, selectforeground=text)
+
+    while True:
+        event, value = window_siblings.read()
+
+        if event in [sg.WIN_CLOSED, 'Exit', '+ESCAPE+']:
+            window_siblings.close()
+            break
+        elif event == 'ADD+MOUSE OVER+':
+            window_siblings['ADD'].update(button_color=accent_button_hover)
+        elif event == 'ADD+MOUSE AWAY+':
+            window_siblings['ADD'].update(button_color=accent_button)
+        elif event == 'ALL+MOUSE OVER+':
+            window_siblings['ALL'].update(button_color=default_button_hover)
+        elif event == 'ALL+MOUSE AWAY+':
+            window_siblings['ALL'].update(button_color=default_button)
+        elif event == 'REJECT+MOUSE OVER+':
+            window_siblings['REJECT'].update(button_color=default_button_hover)
+        elif event == 'REJECT+MOUSE AWAY+':
+            window_siblings['REJECT'].update(button_color=default_button)
+
+        elif event == 'ALL':
+            end = len(window_siblings['SIBLINGS'].get_list_values())
+            indices = list(np.arange(0, end, 1))
+            window_siblings['SIBLINGS'].update(set_to_index=indices)
+        elif event == 'REJECT':
+            window_siblings['SIBLINGS'].update(set_to_index=[])
+        elif event == 'ADD':
+            selected_siblings = value['SIBLINGS']
+            window_siblings['ADD'].update(disabled=True)
+            window_siblings['ALL'].update(disabled=True)
+            window_siblings['REJECT'].update(disabled=True)
+            popup_window = popup('Uploading...')
+            threading.Thread(target=add_siblings,
+                             args=(window_siblings, selected_siblings, parent_location, files,),
+                             daemon=True).start()
+            set_all_lists(window)
+            if method in ['DB', 'SCAN']:
+                siblings, _ = find_sibling_directories(folder, method)
+            else:
+                siblings, _ = find_sibling_files(folder, method)
+            window_siblings['SIBLINGS'].update(values=siblings)
+            print(window_siblings['SIBLINGS'].get())
+
+        elif event == 'DONE':
+            popup_window.close()
+            popup_window = None
+            window_siblings['ADD'].update(disabled=False)
+            window_siblings['ALL'].update(disabled=False)
+            window_siblings['REJECT'].update(disabled=False)
+            print(window_siblings['SIBLINGS'].get())
+            if not window_siblings['SIBLINGS'].get():
+                window_siblings.write_event_value('Exit', None)
+
+    return
+
+
+def popup(message):
+    sg.theme('DarkGrey')
+    layout = [[sg.Text(message)]]
+    window = sg.Window('Message', layout, no_titlebar=True, finalize=True, keep_on_top=True, grab_anywhere=True)
+    sg.theme('GNL GUI Theme')
+    return window
+
+
+def add_siblings(window, selected_siblings, parent_location, files):
+    global folders_parameters
+    for selected_sibling in selected_siblings:
+        location = os.path.join(parent_location, selected_sibling)
+        if location not in folders_parameters[files][0]:
+            folders_parameters[files][0].append(location)
+            folders_parameters[files][1].append(selected_sibling)
+    window.write_event_value('DONE', None)
