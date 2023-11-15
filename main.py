@@ -1,10 +1,11 @@
 import PySimpleGUI as sg
 
 from GUI.export import create_export_window, export_events
-from GUI.folders import bind_folders, folders_events, folders_layout
+from GUI.folders import bind_folders, folders_events, folders_layout, folders_parameters, list_methods
 from GUI.gnl import create_gnl_window, gnl_events
 from GUI.exit_screen import sure_you_want_to_close, valid_save_files
-from Constants.design_GUI import my_width, my_height, scaling, width, height, text, FrameFont
+from Constants.design_GUI import my_width, my_height, scaling, width, height, text, FrameFont, TextFont, MenuFont, \
+    various
 from GUI.technique import create_technique_window, technique_events
 from configuration import GUI_ICON
 
@@ -28,8 +29,10 @@ frame_border = 0
 frame_color = 'white'
 frame_text_color = text
 
+menu = [['&File', ['Open...', 'Close']],
+        ['&Settings', ['Export', 'Technique', 'GNL']],
+        ]
 
-buttons = [[sg.Push(), sg.Button('Export'), sg.Button('GNL'), sg.Button('TECHNIQUE')]]
 
 layout_save = [[sg.OK()]]
 
@@ -40,7 +43,8 @@ column_left = [[sg.Text('Welcome to GNOME', justification='left', font='Calibri 
                          font=FrameFont, expand_x=True, title_color=frame_text_color)]
                ]
 
-layout = [[sg.Column(column_left, expand_y=True), sg.Column(buttons, expand_y=True)]]
+layout = [[sg.Menu(menu, text_color=text, font=MenuFont, background_color='white')],
+          [sg.Column(column_left, expand_y=True)]]
 
 
 # Window definition. Originally the GUI will not show the settings window, as it is only retrieved when the settings
@@ -115,7 +119,7 @@ while True:
             window_export.close()
             window_export = None
 
-    elif event == 'TECHNIQUE':
+    elif event == 'Technique':
         if window_technique:
             window_technique.TKroot.focus_set()
         else:
@@ -126,6 +130,16 @@ while True:
         if window_export:
             window_export.close()
             window_export = None
+
+    elif event == 'Open...':
+        method_values = list(folders_parameters.values())[0:3]
+        selected_method = list_methods[method_values.index(True)]
+        if selected_method == 'IMAGE':
+            folder = sg.popup_get_file('Will not see this message', no_window=True)
+        else:
+            folder = sg.popup_get_folder('', no_window=True)
+        window['%s LOCATION' % selected_method].update(folder)
+        # window.write_event_value('FIND %s' % selected_method, value)
 
     if window == window_export:
         export_events(window, event, value)

@@ -38,27 +38,27 @@ def files_for_display(files):
 
 def folders_layout():
     global folders_parameters
-
+    right_click_menu = ['&Right', ['Delete', 'Siblings']]
     column_left = [[sg.Radio('Database', key='DB', group_id='EXPERIMENT', enable_events=True,
                              default=folders_parameters['DB'])],
                    [sg.Listbox(values=folders_parameters['DB FILES'][1], enable_events=True,
                                expand_x=True, expand_y=True, key='DB FILES', size=column_size,
                                highlight_background_color=light_accent, highlight_text_color=text,
-                               horizontal_scroll=True)]]
+                               horizontal_scroll=True, right_click_menu=right_click_menu)]]
 
     column_middle = [[sg.Radio('Scans', key='SCAN', group_id='EXPERIMENT', enable_events=True,
                                default=folders_parameters['SCAN'])],
                      [sg.Listbox(values=folders_parameters['SCAN FILES'][1], enable_events=True,
                                  expand_x=True, expand_y=True, key='SCAN FILES', size=column_size,
                                  highlight_background_color=light_accent, highlight_text_color=text,
-                                 horizontal_scroll=True)]]
+                                 horizontal_scroll=True, right_click_menu=right_click_menu)]]
 
     column_right = [[sg.Radio('Images', key='IMAGE', group_id='EXPERIMENT', enable_events=True,
                               default=folders_parameters['IMAGE'])],
                     [sg.Listbox(values=folders_parameters['IMAGE FILES'][1], enable_events=True,
                                 expand_x=True, expand_y=True, key='IMAGE FILES', size=column_size,
                                 highlight_background_color=light_accent, highlight_text_color=text,
-                                horizontal_scroll=True)]]
+                                horizontal_scroll=True, right_click_menu=right_click_menu)]]
 
     layout_db = [[sg.Text('Source folder', font=TextFont, text_color=text, justification='left')],
                  [sg.Input(key='DB LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
@@ -151,7 +151,7 @@ def set_all_lists(window):
         window[files].update(values=folders_parameters[files][1])
 
 
-def folders_events(window, event, _):
+def folders_events(window, event, value):
     global folders_parameters
 
     # If the window is closed
@@ -260,6 +260,20 @@ def folders_events(window, event, _):
             else:
                 for method in list_methods:
                     window[method].update(folders_parameters[method])
+
+    elif event in ['Delete', 'Siblings']:
+        method_values = list(folders_parameters.values())[0:3]
+        selected_method = list_methods[method_values.index(True)]
+        files = '%s FILES' % selected_method
+        selected_indices = window[files].get_indexes()
+        if not selected_indices:
+            return
+        if event == 'Delete':
+            window.write_event_value('%s+DELETE+' % files, value)
+        elif event == 'Siblings':
+            index = selected_indices[0]
+            selected_location = folders_parameters[files][0][index]
+            create_sibling_folder_window(selected_location, selected_method, window)
 
     return
 
@@ -375,7 +389,6 @@ def create_sibling_folder_window(folder, method, window):
             else:
                 siblings, _ = find_sibling_files(folder, method)
             window_siblings['SIBLINGS'].update(values=siblings)
-            print(window_siblings['SIBLINGS'].get())
 
         elif event == 'DONE':
             popup_window.close()
@@ -383,7 +396,6 @@ def create_sibling_folder_window(folder, method, window):
             window_siblings['ADD'].update(disabled=False)
             window_siblings['ALL'].update(disabled=False)
             window_siblings['REJECT'].update(disabled=False)
-            print(window_siblings['SIBLINGS'].get())
             if not window_siblings['SIBLINGS'].get():
                 window_siblings.write_event_value('Exit', None)
 

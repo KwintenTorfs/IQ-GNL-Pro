@@ -5,9 +5,9 @@ import numpy as np
 
 folder = r'C:\Users\ktorfs5\OneDrive - KU Leuven\Biomedical Interns\Amber De Vos'
 
-folders_parameters = {'DB': True,
+folders_parameters = {'DB': False,
                       'SCAN': False,
-                      'IMAGE': False,
+                      'IMAGE': True,
                       'DB LOCATION': '',
                       'SCAN LOCATION': '',
                       'IMAGE LOCATION': '',
@@ -32,7 +32,3 @@ def find_sibling_directories(selected_location, method):
                 sibling_folders.append(directory)
                 sibling_locations.append(location)
     return sibling_folders, sibling_locations
-
-
-A, B = find_sibling_directories(folder.replace('\\', '/'), 'DB')
-

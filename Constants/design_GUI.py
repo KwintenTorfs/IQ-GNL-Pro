@@ -64,6 +64,7 @@ SmallFont = 'Calibri 4'
 ButtonFont = 'Calibri 8'
 TextFont = 'Calibri 8'
 TextFontBold = 'Calibri 8 italic'
+MenuFont = 'Calibri 9'
 
 SpinSize = (10, 1)
 default_button = (text, various)

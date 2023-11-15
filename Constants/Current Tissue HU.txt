@@ -4,6 +4,3 @@ Fat Tissue;-300.0;0.0
 Lung Tissue;-inf;-600.0
 Bone Tissue;300.0;inf
 Qaelum Soft Tissue;-300.0;300.0
-IONI;170.0;190.0
-lk,;0.0;170.0
-";n";0.0;170.0
