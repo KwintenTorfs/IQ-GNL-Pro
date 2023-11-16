@@ -6,8 +6,8 @@ from Constants.design_GUI import text, various, accent, FrameFont, TitleFont, Te
 from Support.Hounsfield_Units import get_hounsfield_dictionary, get_original_tissues
 from configuration import GUI_ICON
 
-scanner_parameters = {'Manufacturer': False,
-                      'Model': False,
+scanner_parameters = {'Manufacturer': True,
+                      'Model': True,
                       'Station': False,
                       'Channels': False,
                       'Software Version': False
@@ -19,23 +19,25 @@ patient_parameters = {'Patient Sex': False,
                       'PACSID': False
                       }
 
-study_parameters = {'kVp': False,
-                    'Kernel': False,
-                    'FOV': False,
+study_parameters = {'kVp': True,
+                    'Kernel': True,
+                    'FOV (mm)': False,
                     'Slice Thickness (mm)': False,
                     'Pixel Size (mm)': False,
                     'Pitch': False,
                     'Protocol': False,
                     'Procedure': False,
-                    'Collimation': False,
+                    'Total Collimation': False,
+                    'Single Collimation': False,
                     'Study Date': False,
                     'Rotation Time (s)': False,
                     'Exposure Time (s)': False,
-                    'Folder': False
+                    'Folder': False,
+                    'Matrix Size': False
                     }
 
 slice_parameters = {'Slice Number': False,
-                    'mAs': False,
+                    'mAs': True,
                     'mA': False,
                     'CTDI (mGy)': False,
                     'SSDE (mGy)': False,

@@ -160,7 +160,10 @@ class Image:
         self.SoftwareVersion = None
         self.Protocol = None
         self.PatientSex = None
+        self.PatientAge = None
+        self.PatientID = None
         self.BodyPart = None
+        self.Rows, self.Columns = None, None
         self.WED, self.f, self.fov_contour, self.body_contour, self.WED_correction_factor = None, None, None, None, None
         self.truncated_fraction, self.WED_uncorrected, self.area, self.ctdi_phantom = None, None, None, None
         self.average_hu, self.totalCollimation, self.singleCollimation = None, None, None
@@ -240,6 +243,14 @@ class Image:
                 self.SliceNumber = int(self.dicom.InstanceNumber)
             except (AttributeError, TypeError):
                 self.SliceNumber = None
+            try:
+                self.Rows = int(self.dicom.Rows)
+            except (AttributeError, TypeError):
+                self.Rows = None
+            try:
+                self.Columns = int(self.dicom.Columns)
+            except (AttributeError, TypeError):
+                self.Columns = None
 
     def set_secondary_dicom_info(self):
         if self.valid:
@@ -271,10 +282,14 @@ class Image:
                 self.station = self.dicom.StationName
             except AttributeError:
                 self.station = None
+            # try:
+            #     self.mA = self.dicom.XRayTubeCurrent
+            # except AttributeError:
+            #     self.mA = None
             try:
-                self.mA = self.dicom.XRayTubeCurrent
-            except AttributeError:
-                self.mA = None
+                self.mA = int(np.round(self.dicom.XRayTubeCurrent, 0))
+            except (AttributeError, TypeError):
+                self.mA = np.nan
             try:
                 self.totalCollimation = self.dicom.TotalCollimationWidth
             except AttributeError:
@@ -307,6 +322,14 @@ class Image:
                 self.PatientSex = self.dicom.PatientSex
             except AttributeError:
                 self.PatientSex = None
+            try:
+                self.PatientAge = self.dicom.PatientAge
+            except AttributeError:
+                self.PatientAge = None
+            try:
+                self.PatientID = self.dicom.PatientID
+            except AttributeError:
+                self.PatientID = None
             try:
                 self.BodyPart = self.dicom.BodyPartExamined
             except AttributeError:

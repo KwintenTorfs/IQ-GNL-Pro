@@ -101,7 +101,8 @@ def exit_events(window, event, value):
     for key in exit_parameters.keys():
         exit_parameters[key] = window[key].get()
     return close_program, save
-#
+
+
 def sure_you_want_to_close():
     layout = [[sg.Text('Save your current file?', font=TitleFont, text_color=accent, justification='left')],
 

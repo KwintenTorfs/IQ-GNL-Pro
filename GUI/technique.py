@@ -21,6 +21,9 @@ technique_parameters = {'GNL MID AX': False,
                         'PER SCAN': True,
                         'PER SLICE': False}
 
+disabled_buttons = {'PER SCAN DISABLE': False,
+                    'PER SLICE DISABLE': False}
+
 
 def technique_layout():
     column_left = [[sg.Text('')]]
@@ -42,9 +45,9 @@ def technique_layout():
 
     layout = [[sg.Text('Measurement Methods', font=TitleFont, text_color=accent, justification='left')],
               [sg.Radio('Measure per scan', key='PER SCAN', group_id='MEASUREMENT', enable_events=True,
-                        default=technique_parameters['PER SCAN']),
+                        default=technique_parameters['PER SCAN'], disabled=disabled_buttons['PER SCAN DISABLE']),
                sg.Radio('Measure per slice', key='PER SLICE', group_id='MEASUREMENT', enable_events=True,
-                        default=technique_parameters['PER SLICE'])],
+                        default=technique_parameters['PER SLICE'], disabled=disabled_buttons['PER SCAN DISABLE'])],
               [sg.Text('', font=SmallFont)],
               [sg.Column(column_left, size=(5, 1)),
                sg.Column(column_right, expand_x=True)],
@@ -65,7 +68,7 @@ def create_technique_window():
     return window_technique
 
 
-def technique_events(window, event, value):
+def technique_events(window, event, value, window_main):
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
     elif event == 'PER SLICE':
@@ -97,3 +100,4 @@ def technique_events(window, event, value):
 
     for key in technique_parameters.keys():
         technique_parameters[key] = window[key].get()
+    window_main.write_event_value('UPDATE TABLE', value)

@@ -1,34 +1,25 @@
-import os
+# call Gfg fnc
+def sum_key(a, b):
+    return a + b
 
-import numpy as np
-
-
-folder = r'C:\Users\ktorfs5\OneDrive - KU Leuven\Biomedical Interns\Amber De Vos'
-
-folders_parameters = {'DB': False,
-                      'SCAN': False,
-                      'IMAGE': True,
-                      'DB LOCATION': '',
-                      'SCAN LOCATION': '',
-                      'IMAGE LOCATION': '',
-                      'DB FILES': [[], []],
-                      'SCAN FILES': [[], []],
-                      'IMAGE FILES': [[], []]}
+def mul_key(a, b):
+    return a * b
 
 
-def find_sibling_directories(selected_location, method):
-    global folders_parameters
-    files = '%s FILES' % method
-    location_list = folders_parameters[files][0]
-    parent_folder = os.path.abspath(os.path.join(selected_location, os.pardir))
-    sibling_folders, sibling_locations = [], []
-    for f in os.scandir(parent_folder):
-        if f.is_dir():
-            location = f.path.replace('\\', '/')
-            print(location)
-            print(selected_location)
-            directory = os.path.basename(location)
-            if location not in location_list and location != selected_location:
-                sibling_folders.append(directory)
-                sibling_locations.append(location)
-    return sibling_folders, sibling_locations
+# initializing dictionary
+# check for function name as key
+test_dict = {"Gfg": sum_key, "is": mul_key, "best": 9}
+
+# printing original dictionary
+print("The original dictionary is : " + str(test_dict))
+
+# calling function using brackets
+# params inside brackets
+res = test_dict['Gfg'](10, 34)
+
+# printing result
+print("The required call result : " + str(res))
+res = test_dict['is'](10, 34)
+
+# printing result
+print("The required mul result : " + str(res))

@@ -7,6 +7,7 @@ import numpy as np
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, \
     light_accent, default_button_hover, accent_button, accent_button_hover
 from GUI.popups import popup_yes_no
+from GUI.technique import technique_parameters, disabled_buttons
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.4 * window_size[0]), int(0.55 * window_size[1]))
@@ -25,8 +26,12 @@ folders_parameters = {'DB': True,
 enable_lists = {'DB': [True, True, True],
                 'SCAN': [False, True, True],
                 'IMAGE': [False, False, True]}
+methods = {'Database': 'DB',
+           'Scans': 'SCAN',
+           'Images': 'IMAGE'}
 
-list_methods = ['DB', 'SCAN', 'IMAGE']
+list_methods = list(methods.values())
+method_names = list(methods.keys())
 
 
 def files_for_display(files):
@@ -39,21 +44,21 @@ def files_for_display(files):
 def folders_layout():
     global folders_parameters
     right_click_menu = ['&Right', ['Delete', 'Siblings']]
-    column_left = [[sg.Radio('Database', key='DB', group_id='EXPERIMENT', enable_events=True,
+    column_left = [[sg.Radio(method_names[0], key='DB', group_id='EXPERIMENT', enable_events=True,
                              default=folders_parameters['DB'])],
                    [sg.Listbox(values=folders_parameters['DB FILES'][1], enable_events=True,
                                expand_x=True, expand_y=True, key='DB FILES', size=column_size,
                                highlight_background_color=light_accent, highlight_text_color=text,
                                horizontal_scroll=True, right_click_menu=right_click_menu)]]
 
-    column_middle = [[sg.Radio('Scans', key='SCAN', group_id='EXPERIMENT', enable_events=True,
+    column_middle = [[sg.Radio(method_names[1], key='SCAN', group_id='EXPERIMENT', enable_events=True,
                                default=folders_parameters['SCAN'])],
                      [sg.Listbox(values=folders_parameters['SCAN FILES'][1], enable_events=True,
                                  expand_x=True, expand_y=True, key='SCAN FILES', size=column_size,
                                  highlight_background_color=light_accent, highlight_text_color=text,
                                  horizontal_scroll=True, right_click_menu=right_click_menu)]]
 
-    column_right = [[sg.Radio('Images', key='IMAGE', group_id='EXPERIMENT', enable_events=True,
+    column_right = [[sg.Radio(method_names[2], key='IMAGE', group_id='EXPERIMENT', enable_events=True,
                               default=folders_parameters['IMAGE'])],
                     [sg.Listbox(values=folders_parameters['IMAGE FILES'][1], enable_events=True,
                                 expand_x=True, expand_y=True, key='IMAGE FILES', size=column_size,
@@ -257,6 +262,16 @@ def folders_events(window, event, value):
                 swipe_lists(window)
                 db, sc, im = enable_lists[event]
                 set_lists(window, db, sc, im)
+                if event == 'IMAGE':
+                    technique_parameters['PER SLICE'] = True
+                    technique_parameters['PER SCAN'] = False
+                    disabled_buttons['PER SCAN DISABLE'] = True
+                    technique_parameters['GNL ALL SLICE'] = True
+                    technique_parameters['GNL MID AX'] = False
+                    technique_parameters['GNL 10 SLICE'] = False
+                    technique_parameters['GNL X SLICE'] = False
+                else:
+                    disabled_buttons['PER SCAN DISABLE'] = False
             else:
                 for method in list_methods:
                     window[method].update(folders_parameters[method])
