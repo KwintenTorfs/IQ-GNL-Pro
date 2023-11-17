@@ -98,8 +98,8 @@ def channels(image):
     return image.channels
 
 
-def time(image):
-    return image.time
+def exposure_time(image):
+    return image.ExposureTime
 
 
 def study_id(image):
@@ -162,6 +162,37 @@ def matrix_size(image):
     return '%sx%s' % (image.Rows, image.Columns)
 
 
+def acquisition_type(image):
+    return image.AcquisitionType
+
+
+def exposure_modulation_type(image):
+    return image.ExposureModulationType
+
+
+def filter_type(image):
+    return image.FilterType
+
+
+def in_stack_position_number(image):
+    return image.InStackPositionNumber
+
+
+def revolution_time(image):
+    return image.RevolutionTime
+
+
+def study_comments(image):
+    return image.StudyComments
+
+
+def study_description(image):
+    return image.StudyDescription
+
+
+def folder(image):
+    return image.folder
+
 
 calculations = {'Channels': channels,
                 'Manufacturer': manufacturer,
@@ -170,7 +201,7 @@ calculations = {'Channels': channels,
                 'Station': station,
                 'Body Part Examined': body_part,
                 'PACSID': study_id,
-                'Patient Age': patient_age,
+                'Patient Age (y)': patient_age,
                 'Patient ID': patient_id,
                 'Patient Sex': patient_sex,
                 'FOV (mm)': fov,
@@ -180,21 +211,28 @@ calculations = {'Channels': channels,
                 'Pixel Size (mm)': pixel_size,
                 'Procedure': procedure,
                 'Protocol': protocol,
-                'Rotation Time (s)': time,
                 'Slice Thickness (mm)': slice_thickness,
                 'Study Date': study_date,
                 'CTDI (mGy)': ctdi_vol,
                 'File': file,
                 'mA': ma,
                 'mAs': mas,
-                'Exposure Time (s)': time,
-                'Folder': path,
+                'Exposure Time (ms)': exposure_time,
+                'Folder': folder,
+                'Path': path,
                 'Slice Number': slice_number,
                 'SSDE (mGy)': ssde,
                 'Truncation Fraction': truncation_fraction,
                 'WED (cm)': wed,
                 'Truncation Correction': wed_correction_factor,
-                'Total Collimation': total_collimation,
-                'Single Collimation': single_collimation,
-                'Matrix Size': matrix_size
+                'Total Collimation (mm)': total_collimation,
+                'Single Collimation (mm)': single_collimation,
+                'Matrix Size': matrix_size,
+                'Acquisition Type': acquisition_type,
+                'Exposure Modulation Type': exposure_modulation_type,
+                'Filter Type': filter_type,
+                'Position in Stack': in_stack_position_number,
+                'Revolution Time (s)': revolution_time,
+                'Study Comments': study_comments,
+                'Study Description': study_description
                 }

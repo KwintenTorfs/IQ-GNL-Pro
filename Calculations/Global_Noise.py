@@ -7,6 +7,8 @@ samei_bin_width = 1
 # Also according to Samei2020, kernel size should be 7 x 7
 samei_kernel = 7
 
+standard_slice = {'3mm': 3}
+
 
 def get_kernel_in_pixel(pixel_in_mm, kernel_in_mm):
     # For a fixed kernel size (in mm), return the kernel size in (odd) number of pixels
@@ -106,6 +108,15 @@ def global_noise_2d(image, kernel_size=samei_kernel, tissue='soft', hounsfield_r
     noise_map = construct_noise_map(image, mask_size=kernel_size)
     if not hounsfield_range:
         hounsfield_range = tissue_hounsfield_units[tissue]
+    noise_values = noise_values_per_tissue(noise_map, image, hounsfield_range)
+    try:
+        gnl_mode, gnl_median = histogram_mode(noise_values)
+    except ValueError:
+        gnl_mode, gnl_median = None, None
+    return gnl_mode, gnl_median
+
+
+def global_noise_from_noise_map(image, noise_map, hounsfield_range):
     noise_values = noise_values_per_tissue(noise_map, image, hounsfield_range)
     try:
         gnl_mode, gnl_median = histogram_mode(noise_values)

@@ -10,11 +10,14 @@ scanner_parameters = {'Manufacturer': True,
                       'Model': True,
                       'Station': False,
                       'Channels': False,
-                      'Software Version': False
+                      'Software Version': False,
+                      'Filter Type': False,
+                      'Exposure Modulation Type': False,
+                      'Acquisition Type': False,
                       }
 
 patient_parameters = {'Patient Sex': False,
-                      'Patient Age': False,
+                      'Patient Age (y)': False,
                       'Body Part Examined': False,
                       'PACSID': False
                       }
@@ -27,13 +30,15 @@ study_parameters = {'kVp': True,
                     'Pitch': False,
                     'Protocol': False,
                     'Procedure': False,
-                    'Total Collimation': False,
-                    'Single Collimation': False,
+                    'Total Collimation (mm)': False,
+                    'Single Collimation (mm)': False,
                     'Study Date': False,
-                    'Rotation Time (s)': False,
-                    'Exposure Time (s)': False,
+                    'Exposure Time (ms)': False,
+                    'Revolution Time (s)': False,
                     'Folder': False,
-                    'Matrix Size': False
+                    'Matrix Size': False,
+                    'Study Comments': False,
+                    'Study Description': False
                     }
 
 slice_parameters = {'Slice Number': False,
@@ -44,14 +49,17 @@ slice_parameters = {'Slice Number': False,
                     'WED (cm)': False,
                     'Truncation Correction': False,
                     'Truncation Fraction': False,
-                    'File': False}
+                    'File': False,
+                    'Position in Stack': False}
+
+gnl_pre_text = 'GNL '
 
 
 def get_available_tissues():
     current_tissues = get_hounsfield_dictionary()
     parameters = {}
     for k in current_tissues:
-        gnl = 'GNL %s' % k
+        gnl = '%s%s' % (gnl_pre_text, k)
         parameters[gnl] = False
     return parameters
 
@@ -164,7 +172,7 @@ def export_layout():
     for i, tissue in enumerate(tissue_parameters.keys()):
         column = np.floor(i / nb_gnl_per_column).astype(int)
         font = TextFont
-        if tissue.split('GNL ')[1] in original_tissues:
+        if tissue.split(gnl_pre_text)[1] in original_tissues:
             font = TextFontBold
         layout_columns[column].append([sg.Checkbox(text=tissue, default=tissue_parameters[tissue], size=size,
                                                    text_color=text, font=font, background_color=frame_color, key=tissue,

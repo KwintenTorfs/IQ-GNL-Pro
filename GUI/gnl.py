@@ -172,7 +172,6 @@ def gnl_events(window, event, value):
     # If the name exceeds the space, it is shortened
     elif event == 'NAME':
         while len(window[event].get()) > max_name_input:
-            print(window[event].get())
             window[event].update(window[event].get()[:-1])
 
     # These events are for automatic functions of buttons etc

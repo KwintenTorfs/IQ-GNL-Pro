@@ -1,38 +1,58 @@
 import PySimpleGUI as sg
 
 from Constants.design_GUI import accent, light_accent, text, various, FrameFont, window_size
-from GUI.export import patient_parameters, tissue_parameters, slice_parameters, scanner_parameters, study_parameters
+from GUI.export import patient_parameters, tissue_parameters, slice_parameters, scanner_parameters, \
+    study_parameters, gnl_pre_text
 from GUI.technique import technique_parameters
 from configuration import GUI_ICON
+from Calculations.Global_Noise import standard_slice
 
 settings_window_size = (int(0.45 * window_size[0]), int(0.4 * window_size[1]))
+
+pre_and_suffix = {'AVG': 'AVG ',
+                  'STD': 'STD ',
+                  'HU': ' (HU)',
+                  'LOW': ' - Low',
+                  'HIGH': ' - High',
+                  'STD SLICE': ' - per %s' % list(standard_slice.keys())[0]}
 
 
 def table_header(measure_per_scan):
     header = []
+    if measure_per_scan:
+        header.append('Calculation technique')
+        for parameter in slice_parameters.keys():
+            if slice_parameters[parameter]:
+                header.append('%s%s' % (pre_and_suffix['AVG'], parameter))
+                header.append('%s%s' % (pre_and_suffix['STD'], parameter))
+        for parameter in tissue_parameters.keys():
+            if tissue_parameters[parameter]:
+                tissue = parameter.split(gnl_pre_text)[1]
+                header.append('%s%s%s' % (pre_and_suffix['AVG'], parameter, pre_and_suffix['HU']))
+                header.append('%s%s%s' % (pre_and_suffix['STD'], parameter, pre_and_suffix['HU']))
+                header.append('%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU']))
+                header.append('%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU']))
+
+    else:
+        for parameter in slice_parameters.keys():
+            if slice_parameters[parameter]:
+                header.append(parameter)
+        for parameter in tissue_parameters.keys():
+            if tissue_parameters[parameter]:
+                tissue = parameter.split(gnl_pre_text)[1]
+                header.append('%s%s%s' % (parameter, pre_and_suffix['STD SLICE'], pre_and_suffix['HU']))
+                header.append('%s%s' % (parameter, pre_and_suffix['HU']))
+                header.append('%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU']))
+                header.append('%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU']))
+    for parameter in study_parameters.keys():
+        if study_parameters[parameter]:
+            header.append(parameter)
     for parameter in scanner_parameters.keys():
         if scanner_parameters[parameter]:
             header.append(parameter)
     for parameter in patient_parameters.keys():
         if patient_parameters[parameter]:
             header.append(parameter)
-    for parameter in study_parameters.keys():
-        if study_parameters[parameter]:
-            header.append(parameter)
-    if measure_per_scan:
-        for parameter in slice_parameters.keys():
-            if slice_parameters[parameter]:
-                header.append('AVG %s' % parameter)
-                header.append('STD %s' % parameter)
-    else:
-        for parameter in slice_parameters.keys():
-            if slice_parameters[parameter]:
-                header.append(parameter)
-
-    for parameter in tissue_parameters.keys():
-        if tissue_parameters[parameter]:
-            header.append(parameter)
-    header.append('Calculation technique')
     return header
 
 
@@ -50,6 +70,7 @@ def table_layout():
     widths = []
     for param in headers:
         widths.append(len(param) + 4)
+    # noinspection PyTypeChecker
     layout = [[sg.Table(values=[], headings=headers, auto_size_columns=False, max_col_width=30,
                         display_row_numbers=True, justification='center', col_widths=widths,
                         vertical_scroll_only=False, background_color='white', header_text_color='white',
@@ -59,7 +80,7 @@ def table_layout():
                         sbar_background_color=various,
                         expand_x=True, expand_y=True, key='TABLE',
                         metadata=headers, select_mode="browse")]]
-                        # right_click_menu=['&Right', right_click]
+    # right_click_menu=['&Right', right_click]
     return layout
 
 
@@ -74,5 +95,3 @@ def table_events(window, event, value):
     if '+MOUSE OVER+' in event:
         table_layout()
     return
-
-

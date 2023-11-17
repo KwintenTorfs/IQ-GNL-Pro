@@ -1,25 +1,5 @@
-# call Gfg fnc
-def sum_key(a, b):
-    return a + b
+import os.path
 
-def mul_key(a, b):
-    return a * b
+f = r'D:\Database - ERPW Project\Databases\Patient\Patients - Covid\DE_BUCK_POL_PRUDENT_20230523_113809159'
 
-
-# initializing dictionary
-# check for function name as key
-test_dict = {"Gfg": sum_key, "is": mul_key, "best": 9}
-
-# printing original dictionary
-print("The original dictionary is : " + str(test_dict))
-
-# calling function using brackets
-# params inside brackets
-res = test_dict['Gfg'](10, 34)
-
-# printing result
-print("The required call result : " + str(res))
-res = test_dict['is'](10, 34)
-
-# printing result
-print("The required mul result : " + str(res))
+file = os.path.basename(f)

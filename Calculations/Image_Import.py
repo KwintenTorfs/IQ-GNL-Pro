@@ -164,12 +164,19 @@ class Image:
         self.PatientID = None
         self.BodyPart = None
         self.Rows, self.Columns = None, None
+        self.AcquisitionType = None
+        self.ExposureModulationType = None
+        self.FilterType = None,
+        self.InStackPositionNumber = None
+        self.RevolutionTime = None
+        self.StudyComments = None
+        self.StudyDescription = None
         self.WED, self.f, self.fov_contour, self.body_contour, self.WED_correction_factor = None, None, None, None, None
         self.truncated_fraction, self.WED_uncorrected, self.area, self.ctdi_phantom = None, None, None, None
         self.average_hu, self.totalCollimation, self.singleCollimation = None, None, None
         self.SeriesDescription, self.DataCollectionDiameter = None, None
         self.manufacturer, self.model, self.station, self.procedure, self.SliceNumber = None, None, None, None, None
-        self.kernel, self.SliceThickness, self.channels, self.time, self.study_id = None, None, None, None, None
+        self.kernel, self.SliceThickness, self.channels, self.ExposureTime, self.study_id = None, None, None, None, None
         self.mAs, self.mA, self.kVp, self.CTDI_vol, self.SSDE, self.Pitch = np.nan, None, None, None, None, None
         self.dicom, self.array, self.slope, self.intercept = None, None, None, None
         self.hu, self.body, self.PixelSize, self.mask, self.raw_hu = None, None, None, None, None
@@ -179,14 +186,14 @@ class Image:
         self.file = file
         self.path = os.path.join(directory, file)
         self.filename = os.path.basename(self.path)
+        self.folder = os.path.basename(directory)
         self.valid = True
 
         if self.valid:
             self._get_dicom_file()
             if process:
-                self.set_array()
                 self.set_basic_dicom_info()
-                self.set_secondary_dicom_info()
+                self.set_array()
                 self.mask_and_body_segmentation()
                 self.set_tissue_fractions()
                 self.calculate_ssde()
@@ -251,9 +258,6 @@ class Image:
                 self.Columns = int(self.dicom.Columns)
             except (AttributeError, TypeError):
                 self.Columns = None
-
-    def set_secondary_dicom_info(self):
-        if self.valid:
             try:
                 self.SeriesDescription = self.dicom.SeriesDescription
             except AttributeError:
@@ -267,9 +271,9 @@ class Image:
             except AttributeError:
                 self.study_id = None
             try:
-                self.time = self.dicom.ExposureTime
+                self.ExposureTime = self.dicom.ExposureTime
             except AttributeError:
-                self.time = None
+                self.ExposureTime = None
             try:
                 self.procedure = self.dicom.RequestedProcedureDescription
             except AttributeError:
@@ -282,10 +286,6 @@ class Image:
                 self.station = self.dicom.StationName
             except AttributeError:
                 self.station = None
-            # try:
-            #     self.mA = self.dicom.XRayTubeCurrent
-            # except AttributeError:
-            #     self.mA = None
             try:
                 self.mA = int(np.round(self.dicom.XRayTubeCurrent, 0))
             except (AttributeError, TypeError):
@@ -350,6 +350,45 @@ class Image:
                 self.ReconstructionTargetCenter = np.array(self.dicom.ReconstructionTargetCenterPatient)
             except AttributeError:
                 self.ReconstructionTargetCenter = None
+            try:
+                self.AcquisitionType = self.dicom.AcquisitionType
+            except AttributeError:
+                self.AcquisitionType = None
+            try:
+                self.ExposureModulationType = self.dicom.ExposureModulationType
+            except AttributeError:
+                self.ExposureModulationType = None
+            try:
+                self.FilterType = self.dicom.FilterType
+            except AttributeError:
+                self.FilterType = None
+            try:
+                self.InStackPositionNumber = self.dicom.InStackPositionNumber
+            except AttributeError:
+                self.InStackPositionNumber = None
+            try:
+                self.RevolutionTime = self.dicom.RevolutionTime
+            except AttributeError:
+                self.RevolutionTime = None
+            try:
+                self.StudyComments = self.dicom.StudyComments
+            except AttributeError:
+                self.StudyComments = None
+            try:
+                self.StudyDescription = self.dicom.StudyDescription
+            except AttributeError:
+                self.StudyDescription = None
+            try:
+                ctdi_phantom_code = self.dicom.CTDIPhantomTypeCodeSequence[0].CodeValue
+            except AttributeError:
+                ctdi_phantom_code = None
+            if ctdi_phantom_code == 113691:
+                self.ctdi_phantom = 'Body'
+            elif ctdi_phantom_code == 113690:
+                self.ctdi_phantom = 'Head'
+            else:
+                self.ctdi_phantom = 'Body'
+
 
     def set_array(self):
         if self.valid:
@@ -376,17 +415,6 @@ class Image:
             self.lung, self.fat, self.soft, self.bone = None, None, None, None
 
     def calculate_ssde(self):
-        try:
-            ctdi_phantom_code = self.dicom.CTDIPhantomTypeCodeSequence[0].CodeValue
-        except AttributeError:
-            ctdi_phantom_code = None
-        if ctdi_phantom_code == 113691:
-            self.ctdi_phantom = 'Body'
-        elif ctdi_phantom_code == 113690:
-            self.ctdi_phantom = 'Head'
-        else:
-            self.ctdi_phantom = 'Body'
-
         try:
             self.average_hu = np.nanmean(self.body)
             self.area = np.sum(self.mask) * (self.PixelSize / 10) ** 2  # Cross-sectional area of patient in cm²
@@ -415,4 +443,3 @@ class Image:
 
     def set_slice_number(self, new_slice_number):
         self.SliceNumber = new_slice_number
-
