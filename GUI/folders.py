@@ -103,7 +103,7 @@ def folders_layout():
     return layout
 
 
-def bind_folders(window_folders):
+def folders_bindings(window_folders):
     window_folders['DB LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
     window_folders['SCAN LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
     window_folders['IMAGE LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
@@ -263,15 +263,16 @@ def folders_events(window, event, value):
                 db, sc, im = enable_lists[event]
                 set_lists(window, db, sc, im)
                 if event == 'IMAGE':
-                    technique_parameters['PER SLICE'] = True
-                    technique_parameters['PER SCAN'] = False
-                    disabled_buttons['PER SCAN DISABLE'] = True
-                    technique_parameters['GNL ALL SLICE'] = True
-                    technique_parameters['GNL MID AX'] = False
-                    technique_parameters['GNL 10 SLICE'] = False
-                    technique_parameters['GNL X SLICE'] = False
+                    window['PER SLICE'].update(True)
+                    window['PER SCAN'].update(False, disabled=True)
+                    window['GNL ALL SLICE'].update(True, disabled=True)
+                    window['GNL MID AX'].update(False, disabled=True)
+                    window['GNL 10 SLICE'].update(False, disabled=True)
+                    window['GNL X SLICE'].update(False, disabled=True)
+                    window['NB'].update(disabled=True)
+                    window['text'].update(text_color='grey')
                 else:
-                    disabled_buttons['PER SCAN DISABLE'] = False
+                    window['PER SCAN'].update(disabled=False)
             else:
                 for method in list_methods:
                     window[method].update(folders_parameters[method])

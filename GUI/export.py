@@ -19,7 +19,8 @@ scanner_parameters = {'Manufacturer': True,
 patient_parameters = {'Patient Sex': False,
                       'Patient Age (y)': False,
                       'Body Part Examined': False,
-                      'PACSID': False
+                      'PACSID': False,
+                      'Patient ID': False,
                       }
 
 study_parameters = {'kVp': True,
@@ -38,7 +39,8 @@ study_parameters = {'kVp': True,
                     'Folder': False,
                     'Matrix Size': False,
                     'Study Comments': False,
-                    'Study Description': False
+                    'Study Description': False,
+                    'Path': False
                     }
 
 slice_parameters = {'Slice Number': False,
@@ -50,7 +52,8 @@ slice_parameters = {'Slice Number': False,
                     'Truncation Correction': False,
                     'Truncation Fraction': False,
                     'File': False,
-                    'Position in Stack': False}
+                    'Position in Stack': False,
+                    'Body Area (cm²)': False}
 
 gnl_pre_text = 'GNL '
 

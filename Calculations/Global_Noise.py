@@ -6,6 +6,7 @@ from Calculations.Image_Import import tissue_hounsfield_units
 samei_bin_width = 1
 # Also according to Samei2020, kernel size should be 7 x 7
 samei_kernel = 7
+samei_mask_size = 6  # mm
 
 standard_slice = {'3mm': 3}
 

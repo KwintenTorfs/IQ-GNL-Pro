@@ -14,7 +14,11 @@ pre_and_suffix = {'AVG': 'AVG ',
                   'HU': ' (HU)',
                   'LOW': ' - Low',
                   'HIGH': ' - High',
-                  'STD SLICE': ' - per %s' % list(standard_slice.keys())[0]}
+                  'STD SLICE': ' - per %s' % list(standard_slice.keys())[0],
+                  'AREA': ' Area (cm²)',
+                  'PERC': ' in body (%)',
+                  'MASK': 'Mask Kernel (mm)',
+                  'KERNEL': 'Mask Kernel (px)'}
 
 
 def table_header(measure_per_scan):
@@ -44,6 +48,11 @@ def table_header(measure_per_scan):
                 header.append('%s%s' % (parameter, pre_and_suffix['HU']))
                 header.append('%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU']))
                 header.append('%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU']))
+                header.append('%s%s' % (tissue, pre_and_suffix['AREA']))
+                header.append('%s%s' % (tissue, pre_and_suffix['PERC']))
+    if True in tissue_parameters.values():
+        header.append('%s' % pre_and_suffix['MASK'])
+        header.append('%s' % pre_and_suffix['KERNEL'])
     for parameter in study_parameters.keys():
         if study_parameters[parameter]:
             header.append(parameter)

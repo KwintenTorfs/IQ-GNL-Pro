@@ -82,7 +82,8 @@ def gnl_layout():
                        sg.Column([[sg.Text('HU', font=TextFont, text_color=text, background_color=frame_color)],
                                   [sg.Text('', expand_y=True, background_color=frame_color)]],
                                  background_color=frame_color)
-                       ]]
+                       ],
+                      [sg.Text('', expand_x=True, expand_y=True)]]
 
     current_hu_ranges = get_hounsfield_dictionary()
     available_hu_ranges = tissue_hu_files_to_table_input(current_hu_ranges)
@@ -116,23 +117,26 @@ def gnl_layout():
 def create_gnl_window():
     layout = gnl_layout()
     window_gnl = sg.Window(title='', layout=layout, size=settings_window_size, icon=GUI_ICON, finalize=True)
-    window_gnl['-INF'].bind('<Enter>', '+MOUSE OVER+')
-    window_gnl['-INF'].bind('<Leave>', '+MOUSE AWAY+')
-    window_gnl['INF'].bind('<Enter>', '+MOUSE OVER+')
-    window_gnl['INF'].bind('<Leave>', '+MOUSE AWAY+')
-    window_gnl['ADD TISSUE'].bind('<Enter>', '+MOUSE OVER+')
-    window_gnl['ADD TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
-    window_gnl['REMOVE TISSUE'].bind('<Enter>', '+MOUSE OVER+')
-    window_gnl['REMOVE TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
-    window_gnl['TABLE'].bind('<Delete>', '+DELETE+')
-    window_gnl['TABLE'].bind('<Control_R><a>', '+CTRL+A+')
-    window_gnl['TABLE'].bind('<Control_L><a>', '+CTRL+A+')
-    window_gnl.bind('<Escape>', '+ESCAPE+')
-    window_gnl['LOW'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_gnl['HIGH'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_gnl['NAME'].widget.config(selectbackground=light_accent, selectforeground=text)
+    gnl_bindings(window_gnl)
     return window_gnl
 
+
+def gnl_bindings(window):
+    window['-INF'].bind('<Enter>', '+MOUSE OVER+')
+    window['-INF'].bind('<Leave>', '+MOUSE AWAY+')
+    window['INF'].bind('<Enter>', '+MOUSE OVER+')
+    window['INF'].bind('<Leave>', '+MOUSE AWAY+')
+    window['ADD TISSUE'].bind('<Enter>', '+MOUSE OVER+')
+    window['ADD TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['REMOVE TISSUE'].bind('<Enter>', '+MOUSE OVER+')
+    window['REMOVE TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['TABLE'].bind('<Delete>', '+DELETE+')
+    window['TABLE'].bind('<Control_R><a>', '+CTRL+A+')
+    window['TABLE'].bind('<Control_L><a>', '+CTRL+A+')
+    window.bind('<Escape>', '+ESCAPE+')
+    window['LOW'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window['HIGH'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window['NAME'].widget.config(selectbackground=light_accent, selectforeground=text)
 
 def find_in_string(word, character):
     return [i for i, letter in enumerate(word) if letter == character]

@@ -234,5 +234,6 @@ calculations = {'Channels': channels,
                 'Position in Stack': in_stack_position_number,
                 'Revolution Time (s)': revolution_time,
                 'Study Comments': study_comments,
-                'Study Description': study_description
+                'Study Description': study_description,
+                'Body Area (cm²)': area
                 }

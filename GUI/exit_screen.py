@@ -5,7 +5,6 @@ from Constants.design_GUI import text, various, accent, light_accent, TitleFont,
     accent_button_hover
 from configuration import GUI_ICON
 
-
 valid_save_files = ['.xlsx', '.csv']
 default_file_text = 'Book1'
 default_folder = r'..\Results'
@@ -51,7 +50,7 @@ def exit_layout():
 def create_exit_window():
     layout = exit_layout()
     window_exit = sg.Window('', layout, finalize=True, keep_on_top=True, icon=GUI_ICON, return_keyboard_events=True,
-                       disable_minimize=True, size=(int(0.3 * my_width), int(0.28 * my_height)))
+                            disable_minimize=True, size=(int(0.3 * my_width), int(0.28 * my_height)))
     window_exit['SAVE'].bind('<Enter>', '+MOUSE OVER+')
     window_exit['SAVE'].bind('<Leave>', '+MOUSE AWAY+')
     window_exit['CANCEL'].bind('<Enter>', '+MOUSE OVER+')
@@ -68,6 +67,8 @@ def create_exit_window():
 
 
 def exit_events(window, event, value):
+    close_program = False
+    save = False
     if event == 'SAVE+MOUSE OVER+':
         window['SAVE'].update(button_color=accent_button_hover)
     elif event == 'SAVE+MOUSE AWAY+':
@@ -183,10 +184,9 @@ def sure_you_want_to_close():
             window['-IN-'].update(text_color=text)
         if value['-IN-'] != default_file_text:
             window['-IN-'].update(text_color=text)
-        filename = value['-IN-']
-        folder = value['-FOLDER-']
-        save_type = value['File Type']
+        # filename = value['-IN-']
+        # folder = value['-FOLDER-']
+        # save_type = value['File Type']
     window.close()
 
     return close_program, save
-

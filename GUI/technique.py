@@ -1,17 +1,20 @@
 import PySimpleGUI as sg
 import numpy as np
 
-from Calculations.Global_Noise import samei_kernel
-from Constants.design_GUI import text, various, accent, light_accent, TitleFont, SmallFont, TextFont, SpinSize, \
-    window_size
+from Calculations.Global_Noise import samei_mask_size
+from Constants.design_GUI import text, various, accent, light_accent, TitleFont, SmallFont, TextFont, window_size, \
+    default_button, default_button_hover
+from GUI.gnl import find_in_string
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.45 * window_size[0]), int(0.4 * window_size[1]))
 default_nb_slices = 5
 allowed_slices = '0123456789'
 max_slices_digits = 4
-default_kernel_size = samei_kernel
+default_mask_size = samei_mask_size
 kernels = np.arange(1, 33, 2)
+allowed_mask_size = '0123456789.'
+max_mask_digits = 5
 
 technique_parameters = {'GNL MID AX': False,
                         'GNL ALL SLICE': False,
@@ -53,9 +56,12 @@ def technique_layout():
                sg.Column(column_right, expand_x=True)],
               [sg.Text('', font=SmallFont)],
               [sg.Text('GNL calculation settings', font=TextFont, text_color=text)],
-              [sg.Text('Kernel Size', font=TextFont, text_color=text),
-               sg.Spin(initial_value=default_kernel_size, values=list(kernels), disabled=True, size=SpinSize),
-               sg.Text('NEEDS TO BE RESEARCHED', font=TextFont, text_color=accent)]]
+              [sg.Text('Mask Size', font=TextFont, text_color=text),
+               sg.Input(default_text=default_mask_size, size=(max_mask_digits, 1), font=TextFont, text_color=text,
+                        key='MASK', enable_events=True),
+               sg.Text('mm', font=TextFont, text_color=text),
+               sg.Button('Reset', key='RESET', enable_events=True, size=(7, 1), font=TextFont,
+                         button_color=default_button)]]
 
     return layout
 
@@ -63,14 +69,26 @@ def technique_layout():
 def create_technique_window():
     layout = technique_layout()
     window_technique = sg.Window(title='', layout=layout, size=settings_window_size, icon=GUI_ICON, finalize=True)
-    window_technique['NB'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_technique.bind('<Escape>', '+ESCAPE+')
+    technique_bindings(window_technique)
     return window_technique
+
+
+def technique_bindings(window):
+    window['NB'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window.bind('<Escape>', '+ESCAPE+')
+    window['RESET'].bind('<Enter>', '+MOUSE OVER+')
+    window['RESET'].bind('<Leave>', '+MOUSE AWAY+')
 
 
 def technique_events(window, event, value, window_main):
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
+    elif event == 'RESET+MOUSE OVER+':
+        window['RESET'].update(button_color=default_button_hover)
+    elif event == 'RESET+MOUSE AWAY+':
+        window['RESET'].update(button_color=default_button)
+    elif event == 'RESET':
+        window['MASK'].update(default_mask_size)
     elif event == 'PER SLICE':
         window['GNL ALL SLICE'].update(True, disabled=True)
         window['GNL MID AX'].update(False, disabled=True)
@@ -97,7 +115,29 @@ def technique_events(window, event, value, window_main):
         # If the nb slices is too long for the text space, it is shortened
         if len(value[event]) > max_slices_digits:
             window[event].update(value[event][:-1])
+    elif event == 'MASK':
+        current_value = value[event]
+        commas = find_in_string(current_value, '.')
+        # If the first value is a comma, we add a 0 before it
+        if len(current_value) and current_value[0] == '.':
+            current_value = '0' + current_value
+        # no more than one . in any HU
+        if len(commas) > 1:
+            if max(commas) != len(current_value) - 1:
+                current_value = str(default_mask_size)
+            else:
+                current_value = current_value[:-1]
+        # If the last added value fault_mask_size is not allowed, it is not added
+        if len(current_value) and current_value[-1] not in allowed_mask_size:
+            current_value = current_value[:-1]
+        # If you copy a text and not all characters are allowed. The value is set to default
+        if not all([character in allowed_mask_size for character in current_value]) and len(value):
+            current_value = str(default_nb_slices)
+        window[event].update(current_value)
+        # If the nb slices is too long for the text space, it is shortened
+        if len(value[event]) > max_mask_digits:
+            window[event].update(value[event][:-1])
 
     for key in technique_parameters.keys():
         technique_parameters[key] = window[key].get()
-    window_main.write_event_value('UPDATE TABLE', value)
+    # window_main.write_event_value('UPDATE TABLE', value)

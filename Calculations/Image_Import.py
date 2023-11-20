@@ -389,7 +389,6 @@ class Image:
             else:
                 self.ctdi_phantom = 'Body'
 
-
     def set_array(self):
         if self.valid:
             try:
@@ -443,3 +442,11 @@ class Image:
 
     def set_slice_number(self, new_slice_number):
         self.SliceNumber = new_slice_number
+
+    def get_tissue_measurements(self, tissue_hu):
+        image = self.body
+        tissue_area = len(image[np.logical_and(tissue_hu[1] > image, image >= tissue_hu[0])]) * \
+                         (self.PixelSize / 10) ** 2  # in cm²
+        tissue_percentage = tissue_area / self.area
+        return tissue_area, tissue_percentage
+
