@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 
-from Constants.design_GUI import accent, TitleFont, text, TextFont, various, SpinSize
+from Constants.design_GUI import accent, TitleFont, text, TextFont, various, SpinSize, SmallFont, default_button
 
 valid_save_files = ['.xlsx', '.csv']
 default_file_text = 'Book1'
@@ -16,8 +16,16 @@ def save_layout():
               [sg.Text('File name', font=TextFont, text_color=text, justification='left')],
 
               [sg.Input(default_text=default_file_text, font=TextFont, text_color=text, justification='left',
-                        key='-IN-', expand_x=True, background_color=various, border_width=1),
+                        key='FILE', expand_x=True, background_color=various, border_width=1),
                sg.Spin(values=valid_save_files, key='File Type', text_color=text, font=TextFont, size=SpinSize,
-                       initial_value=exit_parameters['File Type'])]
+                       initial_value=exit_parameters['File Type'])],
+              [sg.Text('', font=SmallFont, text_color=text, justification='left')],
+              [sg.Text('Choose a location', font=TextFont, text_color=text, justification='left')],
+
+              [sg.Input(key='FOLDER', expand_x=True, enable_events=True, font=TextFont, text_color=text,
+                        disabled=False, default_text=exit_parameters['FOLDER'],
+                        justification='left', background_color=various, border_width=1),
+               sg.FolderBrowse(tooltip='Choose a location', font=TextFont, button_color=default_button, size=(6, 1),
+                               key='BROWSE')]
               ]
     return layout

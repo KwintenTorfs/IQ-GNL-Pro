@@ -51,7 +51,7 @@ def gnl_layout():
                             sg.Column(col5, expand_x=True, expand_y=True, background_color=frame_color)]]
 
     standard_gnl = [sg.Frame('Default Tissues', layout=layout_standard_gnl, border_width=frame_border,
-                             background_color=frame_color, expand_y=True, expand_x=True, font=FrameFont,
+                             background_color=frame_color, expand_y=False, expand_x=True, font=FrameFont,
                              title_color=frame_text_color)]
 
     left_input = [[sg.Input(key='LOW', enable_events=True, font=TextFont, text_color=text, disabled=False,
@@ -83,7 +83,7 @@ def gnl_layout():
                                   [sg.Text('', expand_y=True, background_color=frame_color)]],
                                  background_color=frame_color)
                        ],
-                      [sg.Text('', expand_x=True, expand_y=True)]]
+                      ]
 
     current_hu_ranges = get_hounsfield_dictionary()
     available_hu_ranges = tissue_hu_files_to_table_input(current_hu_ranges)
@@ -103,14 +103,14 @@ def gnl_layout():
                               background_color=frame_color, font=FrameFont, expand_x=True, expand_y=True,
                               title_color=frame_text_color)]]
     left_column = [standard_gnl,
-                   [sg.Text('', expand_y=True, expand_x=True, background_color=frame_color)],
                    [sg.Frame('Add New Tissue', layout=layout_new_gnl, border_width=frame_border,
                              background_color=frame_color, font=FrameFont, expand_x=True,
                              title_color=frame_text_color)]]
 
     layout = [[sg.Text('Select GNL tissues', font=TitleFont, text_color=accent, justification='left')],
               [sg.Column(left_column, expand_y=True),
-               sg.Column(right_column, expand_y=True)]]
+               sg.Column(right_column, expand_y=True)],
+              [sg.Text('', expand_y=True, expand_x=True)]]
     return layout
 
 
@@ -137,6 +137,7 @@ def gnl_bindings(window):
     window['LOW'].widget.config(selectbackground=light_accent, selectforeground=text)
     window['HIGH'].widget.config(selectbackground=light_accent, selectforeground=text)
     window['NAME'].widget.config(selectbackground=light_accent, selectforeground=text)
+
 
 def find_in_string(word, character):
     return [i for i, letter in enumerate(word) if letter == character]

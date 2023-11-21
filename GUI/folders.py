@@ -7,7 +7,6 @@ import numpy as np
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, \
     light_accent, default_button_hover, accent_button, accent_button_hover
 from GUI.popups import popup_yes_no
-from GUI.technique import technique_parameters, disabled_buttons
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.4 * window_size[0]), int(0.55 * window_size[1]))
@@ -176,7 +175,7 @@ def folders_events(window, event, value):
         window[event.split('+MOUSE AWAY+')[0]].update(button_color=accent_button)
 
     # To add a new file or folder to the existing selected lists
-    elif 'ADD' in event and 'MOUSE' not in event:
+    elif 'ADD' in event and 'MOUSE' not in event and 'TISSUE' not in event:
         selected_method = event.split('ADD ')[1]
         files = '%s FILES' % selected_method
         loc = '%s LOCATION' % selected_method
@@ -254,28 +253,7 @@ def folders_events(window, event, value):
 
     # Event in case you are going to switch the method of getting slices
     elif event in list_methods:
-        if folders_parameters[event]:
-            return
-        else:
-            switch_method = popup_yes_no('Are you sure you want to switch methods?')
-            if switch_method:
-                swipe_lists(window)
-                db, sc, im = enable_lists[event]
-                set_lists(window, db, sc, im)
-                if event == 'IMAGE':
-                    window['PER SLICE'].update(True)
-                    window['PER SCAN'].update(False, disabled=True)
-                    window['GNL ALL SLICE'].update(True, disabled=True)
-                    window['GNL MID AX'].update(False, disabled=True)
-                    window['GNL 10 SLICE'].update(False, disabled=True)
-                    window['GNL X SLICE'].update(False, disabled=True)
-                    window['NB'].update(disabled=True)
-                    window['text'].update(text_color='grey')
-                else:
-                    window['PER SCAN'].update(disabled=False)
-            else:
-                for method in list_methods:
-                    window[method].update(folders_parameters[method])
+        switch_folder_method(window, event)
 
     elif event in ['Delete', 'Siblings']:
         method_values = list(folders_parameters.values())[0:3]
@@ -294,10 +272,36 @@ def folders_events(window, event, value):
     return
 
 
+def switch_folder_method(window, event):
+    global folders_parameters
+    if folders_parameters[event]:
+        return
+    else:
+        switch_method = popup_yes_no('Are you sure you want to switch methods?')
+        if switch_method:
+            swipe_lists(window)
+            db, sc, im = enable_lists[event]
+            set_lists(window, db, sc, im)
+            if event == 'IMAGE':
+                window['PER SLICE'].update(True)
+                window['PER SCAN'].update(False, disabled=True)
+                window['GNL ALL SLICE'].update(True, disabled=True)
+                window['GNL MID AX'].update(False, disabled=True)
+                window['GNL 10 SLICE'].update(False, disabled=True)
+                window['GNL X SLICE'].update(False, disabled=True)
+                window['NB'].update(disabled=True)
+                window['text'].update(text_color='grey')
+            else:
+                window['PER SCAN'].update(disabled=False)
+        else:
+            for method in list_methods:
+                window[method].update(folders_parameters[method])
+
 ########################################################################################################################
 #
 # Popup with Sibling Folders
 #
+
 
 siblings_window_size = (int(0.2 * window_size[0]), int(0.4 * window_size[1]))
 
