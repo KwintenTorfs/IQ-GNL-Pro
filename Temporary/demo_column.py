@@ -1,6 +1,6 @@
 import numpy as np
 
-from Constants.design_GUI import TextFont, TextFontBold, text
+from Constants.design_GUI import TextFont, text, DefaultTextFont
 from GUI.export import tissue_parameters, nb_gnl_per_column, gnl_pre_text, box_color, frame_color, max_customisable_gnl
 from Support.Hounsfield_Units import get_original_tissues
 import PySimpleGUI as sg
@@ -28,7 +28,7 @@ while i < max_gnl_boxes:
     if i < len(tissue_parameters):
         tissue = list(tissue_parameters.keys())[i]
         if tissue.split(gnl_pre_text)[1] in original_tissues:
-            font = TextFontBold
+            font = DefaultTextFont
         layout_columns[column].append([sg.Checkbox(text=tissue, default=tissue_parameters[tissue], size=size,
                                                    text_color=text, font=font, background_color=frame_color, key=tissue,
                                                    checkbox_color=box_color, enable_events=True)])

@@ -46,14 +46,16 @@ color_theme = {'BACKGROUND': background_color,
                'PROGRESS': (various, color),
                'BORDER': 1,
                'SLIDER_DEPTH': 0,
-               'PROGRESS_DEPTH': 0}
+               'PROGRESS_DEPTH': 0,}
 
 
 background = color_theme.get('BACKGROUND')
 text = color_theme.get('TEXT')
+default_text = 'grey'
 accent = color_theme.get('PROGRESS')[1]
 light_accent = color_theme.get('SCROLL')
 inverse = color_theme.get('INPUT')
+darker_grey = '#dbdbdb'
 
 sg.LOOK_AND_FEEL_TABLE['GNL GUI Theme'] = color_theme
 
@@ -63,8 +65,9 @@ TitleFont = 'Calibri 16'
 SmallFont = 'Calibri 4'
 ButtonFont = 'Calibri 8'
 TextFont = 'Calibri 8'
-TextFontBold = 'Calibri 8 italic'
 MenuFont = 'Calibri 9'
+LargeFont = 'Calibri 11'
+DefaultTextFont = 'Calibri 8 italic'
 
 SpinSize = (10, 1)
 default_button = (text, various)

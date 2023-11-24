@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 import numpy as np
 
 from Constants.design_GUI import text, various, accent, FrameFont, TitleFont, TextFont, default_button, \
-    default_button_hover, accent_button, accent_button_hover, window_size, TextFontBold
+    default_button_hover, accent_button, accent_button_hover, window_size, DefaultTextFont
 from Support.Hounsfield_Units import get_hounsfield_dictionary, get_original_tissues
 from configuration import GUI_ICON
 from GUI.gnl import max_customisable_gnl
@@ -173,7 +173,7 @@ def export_layout():
         if i < len(tissue_parameters):
             tissue = list(tissue_parameters.keys())[i]
             if tissue.split(gnl_pre_text)[1] in original_tissues:
-                font = TextFontBold
+                font = DefaultTextFont
             GNL_dictionary[key] = tissue
             layout_columns[column].append([sg.Checkbox(text=tissue, default=tissue_parameters[tissue], size=size,
                                                        text_color=text, font=font, background_color=frame_color,

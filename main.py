@@ -9,7 +9,7 @@ from GUI.exit_screen import sure_you_want_to_close, valid_save_files
 from Constants.design_GUI import my_width, my_height, scaling, width, height, text, FrameFont, MenuFont, \
     accent
 from GUI.popups import popup_yes_no
-from GUI.save import save_layout
+from GUI.save import save_layout, save_events, save_bindings
 from GUI.table import table_events, create_table_window
 from GUI.technique import technique_events, technique_layout, technique_bindings
 from configuration import GUI_ICON
@@ -86,6 +86,7 @@ technique_bindings(window_main)
 gnl_bindings(window_main)
 folders_bindings(window_main)
 export_bindings(window_main)
+save_bindings(window_main)
 # Things related to the plot window
 
 plot_rows = []
@@ -152,6 +153,7 @@ while True:
         gnl_events(window, event, value)
         technique_events(window, event, value, window_main)
         export_events(window, event, value)
+        save_events(window, event, value)
         # tab = window_main['TAB GROUP'].get()
         # if tab == 'Folders':
         #     folders_events(window, event, value)

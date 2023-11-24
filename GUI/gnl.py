@@ -1,8 +1,9 @@
 import PySimpleGUI as sg
 import numpy as np
 
+from Constants.Images.images_b64 import image_rescale, INFINITY, MIN_INFINITY, TISSUEWHITE, TISSUEREMOVEWHITE
 from Constants.design_GUI import text, various, accent, light_accent, FrameFont, TitleFont, ButtonFont, TextFont, \
-    default_button, default_button_hover, accent_button, accent_button_hover, window_size
+    default_button, default_button_hover, accent_button, accent_button_hover, window_size, MenuFont, darker_grey
 from configuration import GUI_ICON
 from Support.Hounsfield_Units import get_original_hu_ranges, get_hounsfield_dictionary, add_hounsfield_range, \
     drop_hounsfield_tissue, hu_str2float, hu_float2str, infinity
@@ -17,6 +18,7 @@ frame_border = 1
 frame_text_color = text
 frame_color = 'white'
 max_customisable_gnl = 25
+button_color = darker_grey
 
 
 def tissue_hu_files_to_table_input(hu_file):
@@ -57,20 +59,33 @@ def gnl_layout():
     left_input = [[sg.Input(key='LOW', enable_events=True, font=TextFont, text_color=text, disabled=False,
                             size=(max_gnl_tissue_input, 1),  justification='center', background_color=various,
                             border_width=1, default_text=default_hu['LOW'])],
-                  [sg.Button('-Inf', font=ButtonFont, button_color=default_button, size=(max_gnl_tissue_input - 1, 1),
-                             key='-INF')]]
+                  [sg.Push(),
+                   sg.Button('', font=ButtonFont, button_color=(text, 'white'), size=(max_gnl_tissue_input - 1, 1),
+                             key='-INF', image_data=image_rescale(MIN_INFINITY, 23, 10), image_size=(23, 10),
+                             border_width=0),
+                   sg.Push()]]
 
     right_input = [[sg.Input(key='HIGH', enable_events=True, font=TextFont, text_color=text, disabled=False,
                              size=(max_gnl_tissue_input, 1), justification='center', background_color=various,
                              border_width=1, default_text=default_hu['HIGH'])],
-                   [sg.Button('Inf', font=ButtonFont, button_color=default_button, size=(max_gnl_tissue_input - 1, 1),
-                              key='INF')]]
+                   [sg.Push(),
+                    sg.Button('', font=ButtonFont, button_color=(text, 'white'), size=(max_gnl_tissue_input - 1, 1),
+                              key='INF', image_data=image_rescale(INFINITY, 17, 10), image_size=(17, 10),
+                              border_width=0),
+                    sg.Push()]]
 
     layout_new_gnl = [[sg.Text('Name & HU range', font=TextFont, text_color=text, justification='left',
                                background_color=frame_color),
                        sg.Push(background_color=frame_color),
-                       sg.Button('Add', key='ADD TISSUE', button_color=accent_button, font=ButtonFont,
-                                 size=(4, 1))],
+                       sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(TISSUEWHITE, 20, 20),
+                                                       image_size=(20, 20), button_color=frame_color, border_width=0,
+                                                       key='TISSUE ICON', size=(20, 1),
+                                                       enable_events=True),
+                                             sg.Button('Add', button_color=(text, frame_color), font=MenuFont,
+                                                       border_width=0, key='ADD TISSUE', enable_events=True)]],
+                                background_color=frame_color, border_width=0, key='FRAME TISSUE',
+                                size=(80, 30))
+                       ],
                       [sg.Input(key='NAME', enable_events=True, font=TextFont, text_color=text, disabled=False,
                                 size=(max_name_input, 1), justification='left', background_color=various,
                                 border_width=1)],
@@ -96,8 +111,16 @@ def gnl_layout():
                                      selected_row_colors=(text, light_accent), hide_vertical_scroll=True,
                                      enable_events=False, enable_click_events=True)],
                            [sg.Push(background_color=frame_color),
-                            sg.Button('Remove', key='REMOVE TISSUE', button_color=default_button, font=ButtonFont,
-                                      size=(6, 1))]]
+                            sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(TISSUEREMOVEWHITE, 20, 20),
+                                                            image_size=(20, 20), button_color=frame_color,
+                                                            border_width=0,
+                                                            key='TISSUE REMOVE ICON', size=(20, 1),
+                                                            enable_events=True),
+                                                  sg.Button('Remove', button_color=(text, frame_color), font=MenuFont,
+                                                            border_width=0, key='REMOVE TISSUE', enable_events=True)]],
+                                     background_color=frame_color, border_width=0, key='FRAME TISSUE REMOVE',
+                                     size=(110, 30))
+                            ]]
 
     right_column = [[sg.Frame('Custom Tissues', layout=available_gnl_range, border_width=frame_border,
                               background_color=frame_color, font=FrameFont, expand_x=True, expand_y=True,
@@ -130,9 +153,17 @@ def gnl_bindings(window):
     window['ADD TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
     window['REMOVE TISSUE'].bind('<Enter>', '+MOUSE OVER+')
     window['REMOVE TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['FRAME TISSUE REMOVE'].bind('<Enter>', '+MOUSE OVER+')
+    window['FRAME TISSUE REMOVE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['TISSUE REMOVE ICON'].bind('<Enter>', '+MOUSE OVER+')
+    window['TISSUE REMOVE ICON'].bind('<Leave>', '+MOUSE AWAY+')
     window['TABLE'].bind('<Delete>', '+DELETE+')
     window['TABLE'].bind('<Control_R><a>', '+CTRL+A+')
     window['TABLE'].bind('<Control_L><a>', '+CTRL+A+')
+    window['FRAME TISSUE'].bind('<Enter>', '+MOUSE OVER+')
+    window['FRAME TISSUE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['TISSUE ICON'].bind('<Enter>', '+MOUSE OVER+')
+    window['TISSUE ICON'].bind('<Leave>', '+MOUSE AWAY+')
     window.bind('<Escape>', '+ESCAPE+')
     window['LOW'].widget.config(selectbackground=light_accent, selectforeground=text)
     window['HIGH'].widget.config(selectbackground=light_accent, selectforeground=text)
@@ -183,19 +214,39 @@ def gnl_events(window, event, value):
     elif event == '-INF+MOUSE OVER+':
         window['-INF'].update(button_color=default_button_hover)
     elif event == '-INF+MOUSE AWAY+':
-        window['-INF'].update(button_color=default_button)
+        window['-INF'].update(button_color=(text, 'white'))
     elif event == 'INF+MOUSE OVER+':
         window['INF'].update(button_color=default_button_hover)
     elif event == 'INF+MOUSE AWAY+':
-        window['INF'].update(button_color=default_button)
-    elif event == 'ADD TISSUE+MOUSE OVER+':
-        window['ADD TISSUE'].update(button_color=accent_button_hover)
-    elif event == 'ADD TISSUE+MOUSE AWAY+':
-        window['ADD TISSUE'].update(button_color=accent_button)
-    elif event == 'REMOVE TISSUE+MOUSE OVER+':
-        window['REMOVE TISSUE'].update(button_color=default_button_hover)
-    elif event == 'REMOVE TISSUE+MOUSE AWAY+':
-        window['REMOVE TISSUE'].update(button_color=default_button)
+        window['INF'].update(button_color=(text, 'white'))
+    elif event in ['ADD TISSUE+MOUSE OVER+', 'TISSUE ICON+MOUSE OVER+', 'FRAME TISSUE+MOUSE OVER+']:
+        window['ADD TISSUE'].update(button_color=(text, button_color))
+        window['TISSUE ICON'].update(button_color=button_color)
+        window['FRAME TISSUE'].Widget.config(background=button_color)
+        window['ADD TISSUE'].ParentRowFrame.config(background=button_color)
+        window['TISSUE ICON'].ParentRowFrame.config(background=button_color)
+
+    elif event in ['ADD TISSUE+MOUSE AWAY+', 'TISSUE ICON+MOUSE AWAY+', 'FRAME TISSUE+MOUSE AWAY+']:
+        window['ADD TISSUE'].update(button_color=(text, frame_color))
+        window['TISSUE ICON'].update(button_color=frame_color)
+        window['FRAME TISSUE'].Widget.config(background=frame_color)
+        window['ADD TISSUE'].ParentRowFrame.config(background=frame_color)
+        window['TISSUE ICON'].ParentRowFrame.config(background=frame_color)
+
+    elif event in ['REMOVE TISSUE+MOUSE OVER+', 'TISSUE REMOVE ICON+MOUSE OVER+', 'FRAME TISSUE REMOVE+MOUSE OVER+']:
+        window['REMOVE TISSUE'].update(button_color=(text, button_color))
+        window['TISSUE REMOVE ICON'].update(button_color=button_color)
+        window['FRAME TISSUE REMOVE'].Widget.config(background=button_color)
+        window['REMOVE TISSUE'].ParentRowFrame.config(background=button_color)
+        window['TISSUE REMOVE ICON'].ParentRowFrame.config(background=button_color)
+
+    elif event in ['REMOVE TISSUE+MOUSE AWAY+', 'TISSUE REMOVE ICON+MOUSE AWAY+', 'FRAME TISSUE REMOVE+MOUSE AWAY+']:
+        window['REMOVE TISSUE'].update(button_color=(text, frame_color))
+        window['TISSUE REMOVE ICON'].update(button_color=frame_color)
+        window['FRAME TISSUE REMOVE'].Widget.config(background=frame_color)
+        window['REMOVE TISSUE'].ParentRowFrame.config(background=frame_color)
+        window['TISSUE REMOVE ICON'].ParentRowFrame.config(background=frame_color)
+
     elif event == 'INF':
         window['HIGH'].update(infinity)
     elif event == '-INF':
