@@ -4,9 +4,11 @@ import threading
 import PySimpleGUI as sg
 import numpy as np
 
+from Constants.Images.images_b64 import image_rescale, FOLDERBROWSEWHITE, FOLDERADDWHITE
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, \
-    light_accent, default_button_hover, accent_button, accent_button_hover
+    light_accent, default_button_hover, accent_button, accent_button_hover, LargeFont
 from GUI.popups import popup_yes_no
+from GUI.save import darker_frame
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.4 * window_size[0]), int(0.55 * window_size[1]))
@@ -28,6 +30,9 @@ enable_lists = {'DB': [True, True, True],
 methods = {'Database': 'DB',
            'Scans': 'SCAN',
            'Images': 'IMAGE'}
+
+browse_operations = ['FIND', 'BROWSE', 'FRAME']
+add_operations = ['ADD', 'ICON ADD', 'BOX ADD']
 
 list_methods = list(methods.values())
 method_names = list(methods.keys())
@@ -68,28 +73,63 @@ def folders_layout():
                  [sg.Input(key='DB LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
                            disabled=False, justification='left', background_color=various, border_width=1,
                            default_text=folders_parameters['DB LOCATION']),
-                  sg.FolderBrowse(tooltip='Choose source folder', font=TextFont, button_color=default_button,
-                                  size=(6, 1), key='FIND DB', enable_events=True)],
+                  sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERBROWSEWHITE, 22, 15),
+                                                  image_size=(22, 15), button_color='white', border_width=0,
+                                                  key='BROWSE DB', button_type=sg.BUTTON_TYPE_BROWSE_FOLDER,
+                                                  enable_events=True, target='DB LOCATION'),
+                                        sg.Button('Browse', button_color='white', font=TextFont, border_width=0,
+                                                  button_type=sg.BUTTON_TYPE_BROWSE_FOLDER, key='FIND DB', size=(7, 1),
+                                                  enable_events=True, target='DB LOCATION')]],
+                           key='FRAME DB', border_width=0, size=(100, 25))],
                  [sg.Push(),
-                  sg.Button('Add Folder', key='ADD DB', button_color=accent_button, font=TextFont, size=(10, 1))]]
+                  sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERADDWHITE, 20, 15),
+                                                  image_size=(22, 15), button_color='white', border_width=0,
+                                                  key='ICON ADD DB', enable_events=True),
+                                        sg.Button('Add folder', button_color='white', font=TextFont, border_width=0,
+                                                  key='ADD DB', size=(10, 1), enable_events=True)]],
+                           key='BOX ADD DB', border_width=0, size=(100, 25))]]
 
     layout_scan = [[sg.Text('Scan folder', font=TextFont, text_color=text, justification='left')],
                    [sg.Input(key='SCAN LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
                              disabled=False, justification='left', background_color=various, border_width=1,
                              default_text=folders_parameters['SCAN LOCATION']),
-                    sg.FolderBrowse(tooltip='Choose scan folder', font=TextFont, button_color=default_button,
-                                    size=(6, 1), key='FIND SCAN', enable_events=True)],
+                    sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERBROWSEWHITE, 22, 15),
+                                                    image_size=(22, 15), button_color='white', border_width=0,
+                                                    key='BROWSE SCAN', button_type=sg.BUTTON_TYPE_BROWSE_FOLDER,
+                                                    enable_events=True, target='SCAN LOCATION'),
+                                          sg.Button('Browse', button_color='white', font=TextFont, border_width=0,
+                                                    button_type=sg.BUTTON_TYPE_BROWSE_FOLDER, key='FIND SCAN',
+                                                    size=(7, 1),
+                                                    enable_events=True, target='SCAN LOCATION')]],
+                             key='FRAME SCAN', border_width=0, size=(100, 25))],
                    [sg.Push(),
-                    sg.Button('Add Folder', key='ADD SCAN', button_color=accent_button, font=TextFont, size=(10, 1))]]
+                    sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERADDWHITE, 20, 15),
+                                                    image_size=(22, 15), button_color='white', border_width=0,
+                                                    key='ICON ADD SCAN', enable_events=True),
+                                          sg.Button('Add folder', button_color='white', font=TextFont, border_width=0,
+                                                    key='ADD SCAN', size=(10, 1), enable_events=True)]],
+                             key='BOX ADD SCAN', border_width=0, size=(100, 25))]]
 
     layout_file = [[sg.Text('Select file', font=TextFont, text_color=text, justification='left')],
                    [sg.Input(key='IMAGE LOCATION', expand_x=True, enable_events=True, font=TextFont, text_color=text,
                              disabled=False, justification='left', background_color=various, border_width=1,
                              default_text=folders_parameters['IMAGE LOCATION']),
-                    sg.FileBrowse(tooltip='Choose file', font=TextFont, button_color=default_button,
-                                  size=(6, 1), key='FIND IMAGE', enable_events=True)],
+                    sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERBROWSEWHITE, 22, 15),
+                                                    image_size=(22, 15), button_color='white', border_width=0,
+                                                    key='BROWSE IMAGE', button_type=sg.BUTTON_TYPE_BROWSE_FILE,
+                                                    enable_events=True, target='IMAGE LOCATION'),
+                                          sg.Button('Browse', button_color='white', font=TextFont, border_width=0,
+                                                    button_type=sg.BUTTON_TYPE_BROWSE_FOLDER, key='FIND IMAGE',
+                                                    size=(7, 1),
+                                                    enable_events=True, target='IMAGE LOCATION')]],
+                             key='FRAME IMAGE', border_width=0, size=(100, 25))],
                    [sg.Push(),
-                    sg.Button('Add File', key='ADD IMAGE', button_color=accent_button, font=TextFont, size=(8, 1))]]
+                    sg.Frame('', layout=[[sg.Button('', image_data=image_rescale(FOLDERADDWHITE, 20, 15),
+                                                    image_size=(22, 15), button_color='white', border_width=0,
+                                                    key='ICON ADD IMAGE', enable_events=True),
+                                          sg.Button('Add file', button_color='white', font=TextFont, border_width=0,
+                                                    key='ADD IMAGE', size=(10, 1), enable_events=True)]],
+                             key='BOX ADD IMAGE', border_width=0, size=(100, 25))]]
 
     layout = [[sg.Text('Select Data', font=TitleFont, text_color=accent, justification='left')],
               [sg.Column(layout_db, expand_x=True, visible=folders_parameters['DB'], key='DB COLUMN'),
@@ -102,26 +142,27 @@ def folders_layout():
     return layout
 
 
-def folders_bindings(window_folders):
-    window_folders['DB LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_folders['SCAN LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_folders['IMAGE LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window_folders['FIND DB'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['FIND DB'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['FIND SCAN'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['FIND SCAN'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['FIND IMAGE'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['FIND IMAGE'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['ADD DB'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['ADD DB'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['ADD SCAN'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['ADD SCAN'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['ADD IMAGE'].bind('<Enter>', '+MOUSE OVER+')
-    window_folders['ADD IMAGE'].bind('<Leave>', '+MOUSE AWAY+')
-    window_folders['DB FILES'].bind('<Delete>', '+DELETE+')
-    window_folders['SCAN FILES'].bind('<Delete>', '+DELETE+')
-    window_folders['IMAGE FILES'].bind('<Delete>', '+DELETE+')
-    window_folders.bind('<Escape>', '+ESCAPE+')
+def folders_bindings(window):
+    window['DB LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window['SCAN LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window['IMAGE LOCATION'].widget.config(selectbackground=light_accent, selectforeground=text)
+    window['ADD DB'].bind('<Enter>', '+MOUSE OVER+')
+    window['ADD DB'].bind('<Leave>', '+MOUSE AWAY+')
+    window['ADD SCAN'].bind('<Enter>', '+MOUSE OVER+')
+    window['ADD SCAN'].bind('<Leave>', '+MOUSE AWAY+')
+    window['ADD IMAGE'].bind('<Enter>', '+MOUSE OVER+')
+    window['ADD IMAGE'].bind('<Leave>', '+MOUSE AWAY+')
+    window['DB FILES'].bind('<Delete>', '+DELETE+')
+    window['SCAN FILES'].bind('<Delete>', '+DELETE+')
+    window['IMAGE FILES'].bind('<Delete>', '+DELETE+')
+    for method in methods.values():
+        for browse_operation in browse_operations:
+            window['%s %s' % (browse_operation, method)].bind('<Enter>', '+MOUSE OVER+')
+            window['%s %s' % (browse_operation, method)].bind('<Leave>', '+MOUSE AWAY+')
+        for add_operation in add_operations:
+            window['%s %s' % (add_operation, method)].bind('<Enter>', '+MOUSE OVER+')
+            window['%s %s' % (add_operation, method)].bind('<Leave>', '+MOUSE AWAY+')
+    window.bind('<Escape>', '+ESCAPE+')
 
 
 def set_lists(window, db, scan, image):
@@ -156,31 +197,63 @@ def set_all_lists(window):
 
 
 def folders_events(window, event, value):
-    global folders_parameters
-
     # If the window is closed
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
 
     # For automatic events, involving buttons etc.
-    elif 'MOUSE OVER' in event and 'FIND' in event:
-        window[event.split('+MOUSE OVER+')[0]].update(button_color=default_button_hover)
-    elif 'MOUSE AWAY' in event and 'FIND' in event:
-        window[event.split('+MOUSE AWAY+')[0]].update(button_color=default_button)
+    elif 'MOUSE' in event:
+        if 'OVER' in event:
+            mouse_type = '+MOUSE OVER+'
+            color = darker_frame
+        else:
+            mouse_type = '+MOUSE AWAY+'
+            color = 'white'
+        if any([method in event for method in methods.values()]):
+            if any([button in event for button in browse_operations]):
+                pure_event = event.split(mouse_type)[0]
+                method = None
+                for type_button in browse_operations:
+                    splitting = pure_event.split('%s ' % type_button)
+                    if len(splitting) > 1:
+                        method = splitting[1]
+                window['BROWSE %s' % method].update(button_color=color)
+                window['FIND %s' % method].update(button_color=color)
+                window['FRAME %s' % method].Widget.config(background=color)
+                window['FIND %s' % method].ParentRowFrame.config(background=color)
+                window['BROWSE %s' % method].ParentRowFrame.config(background=color)
+            elif any([button in event for button in add_operations]):
+                pure_event = event.split(mouse_type)[0]
+                method = None
+                for type_button in add_operations:
+                    splitting = pure_event.split('%s ' % type_button)
+                    if len(splitting) > 1:
+                        method = splitting[1]
+                window['ADD %s' % method].update(button_color=color)
+                window['ICON ADD %s' % method].update(button_color=color)
+                window['BOX ADD %s' % method].Widget.config(background=color)
+                window['ICON ADD %s' % method].ParentRowFrame.config(background=color)
+                window['ADD %s' % method].ParentRowFrame.config(background=color)
+
     elif 'LOCATION' in event and 'MOUSE' not in event:
-        window['FIND %s' % event.split(' LOCATION')[0]].update(button_color=default_button)
-    elif 'MOUSE OVER' in event and 'ADD' in event:
-        window[event.split('+MOUSE OVER+')[0]].update(button_color=accent_button_hover)
-    elif 'MOUSE AWAY' in event and 'ADD' in event:
-        window[event.split('+MOUSE AWAY+')[0]].update(button_color=accent_button)
+        method = event.split(' LOCATION')[0]
+        window['BROWSE %s' % method].update(button_color='white')
+        window['FIND %s' % method].update(button_color='white')
+        window['FRAME %s' % method].Widget.config(background='white')
+        window['FIND %s' % method].ParentRowFrame.config(background='white')
 
     # To add a new file or folder to the existing selected lists
     elif 'ADD' in event and 'MOUSE' not in event and 'TISSUE' not in event:
-        selected_method = event.split('ADD ')[1]
-        files = '%s FILES' % selected_method
-        loc = '%s LOCATION' % selected_method
+        method = event.split('ADD ')[1]
+        files = '%s FILES' % method
+        loc = '%s LOCATION' % method
         location = window[loc].get().replace('/', '\\')
-        window[event].update(button_color=accent_button)
+        color = 'white'
+        window['ADD %s' % method].update(button_color=color)
+        window['ICON ADD %s' % method].update(button_color=color)
+        window['BOX ADD %s' % method].Widget.config(background=color)
+        window['ICON ADD %s' % method].ParentRowFrame.config(background=color)
+        window['ADD %s' % method].ParentRowFrame.config(background=color)
         if location != '' and (os.path.isdir(location) or os.path.isfile(location)):
             if location not in folders_parameters[files][0]:
                 folders_parameters[files][0].append(location)
@@ -192,14 +265,14 @@ def folders_events(window, event, value):
                          text_color=text, title='', no_titlebar=True, keep_on_top=True, background_color=light_accent,
                          button_color=accent_button)
 
-            create_sibling_folder_window(location, selected_method, window)
+            create_sibling_folder_window(location, method, window)
         folders_parameters[loc] = ''
         window[loc].update(folders_parameters[loc])
 
     # Functions for all events concerning the individual lists
     elif 'FILES' in event:
-        selected_method = event.split(' FILES')[0]
-        files = '%s FILES' % selected_method
+        method = event.split(' FILES')[0]
+        files = '%s FILES' % method
         all_selected_indices = window[files].get_indexes()
         if not all_selected_indices:
             return
@@ -209,9 +282,9 @@ def folders_events(window, event, value):
 
         # Operation 1 = deleting an event from the lists
         if '+DELETE+' in event:
-            if not window[selected_method].get():
+            if not window[method].get():
                 return
-            method_index = list_methods.index(selected_method)
+            method_index = list_methods.index(method)
             delete_lists = [method for method in list_methods if list_methods.index(method) > method_index]
             for method in delete_lists:
                 folders_parameters['%s FILES' % method] = [[], []]
@@ -257,8 +330,8 @@ def folders_events(window, event, value):
 
     elif event in ['Delete', 'Siblings']:
         method_values = list(folders_parameters.values())[0:3]
-        selected_method = list_methods[method_values.index(True)]
-        files = '%s FILES' % selected_method
+        method = list_methods[method_values.index(True)]
+        files = '%s FILES' % method
         selected_indices = window[files].get_indexes()
         if not selected_indices:
             return
@@ -267,7 +340,7 @@ def folders_events(window, event, value):
         elif event == 'Siblings':
             index = selected_indices[0]
             selected_location = folders_parameters[files][0][index]
-            create_sibling_folder_window(selected_location, selected_method, window)
+            create_sibling_folder_window(selected_location, method, window)
 
     return
 

@@ -61,7 +61,7 @@ def gnl_layout():
                             border_width=1, default_text=default_hu['LOW'])],
                   [sg.Push(),
                    sg.Button('', font=ButtonFont, button_color=(text, 'white'), size=(max_gnl_tissue_input - 1, 1),
-                             key='-INF', image_data=image_rescale(MIN_INFINITY, 23, 10), image_size=(23, 10),
+                             key='-INF', image_data=image_rescale(MIN_INFINITY, 23, 9), image_size=(23, 9),
                              border_width=0),
                    sg.Push()]]
 
@@ -70,7 +70,7 @@ def gnl_layout():
                              border_width=1, default_text=default_hu['HIGH'])],
                    [sg.Push(),
                     sg.Button('', font=ButtonFont, button_color=(text, 'white'), size=(max_gnl_tissue_input - 1, 1),
-                              key='INF', image_data=image_rescale(INFINITY, 17, 10), image_size=(17, 10),
+                              key='INF', image_data=image_rescale(INFINITY, 20, 9), image_size=(20, 9),
                               border_width=0),
                     sg.Push()]]
 
@@ -253,7 +253,7 @@ def gnl_events(window, event, value):
         window['LOW'].update('-%s' % infinity)
 
     # Following Event will add a new custom tissue to the database
-    elif event == 'ADD TISSUE':
+    elif event in ['ADD TISSUE', 'TISSUE ICON']:
         tissue = value['NAME']
         low = value['LOW']
         high = value['HIGH']
@@ -272,7 +272,7 @@ def gnl_events(window, event, value):
             window['HIGH'].update(default_hu['HIGH'])
 
     # Following Event will remove a custom tissue to the database
-    elif event in ['REMOVE TISSUE', 'TABLE+DELETE+']:
+    elif event in ['REMOVE TISSUE', 'TABLE+DELETE+', 'TISSUE REMOVE ICON']:
         selected_rows = list(value['TABLE'])
         table = window['TABLE'].get()
         for row in selected_rows:

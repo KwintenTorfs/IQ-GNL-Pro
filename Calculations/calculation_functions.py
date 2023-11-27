@@ -237,3 +237,70 @@ calculations = {'Channels': channels,
                 'Study Description': study_description,
                 'Body Area (cm²)': area
                 }
+
+
+image_processing = {'Channels': 'BASIC',
+                    'Manufacturer': 'BASIC',
+                    'Model': 'BASIC',
+                    'Software Version': 'BASIC',
+                    'Station': 'BASIC',
+                    'Body Part Examined': 'BASIC',
+                    'PACSID': 'BASIC',
+                    'Patient Age (y)': 'BASIC',
+                    'Patient ID': 'BASIC',
+                    'Patient Sex': 'BASIC',
+                    'FOV (mm)': 'BASIC',
+                    'Kernel': 'BASIC',
+                    'kVp': 'BASIC',
+                    'Pitch': 'BASIC',
+                    'Pixel Size (mm)': 'BASIC',
+                    'Procedure': 'BASIC',
+                    'Protocol': 'BASIC',
+                    'Slice Thickness (mm)': 'BASIC',
+                    'Study Date': 'BASIC',
+                    'CTDI (mGy)': 'BASIC',
+                    'File': 'BASIC',
+                    'mA': 'BASIC',
+                    'mAs': 'BASIC',
+                    'Exposure Time (ms)': 'BASIC',
+                    'Folder': 'BASIC',
+                    'Path': 'BASIC',
+                    'Slice Number': 'BASIC',
+                    'SSDE (mGy)': 'WED',
+                    'Truncation Fraction': 'WED',
+                    'WED (cm)': 'WED',
+                    'Truncation Correction': 'WED',
+                    'Total Collimation (mm)': 'BASIC',
+                    'Single Collimation (mm)': 'BASIC',
+                    'Matrix Size': 'BASIC',
+                    'Acquisition Type': 'BASIC',
+                    'Exposure Modulation Type': 'BASIC',
+                    'Filter Type': 'BASIC',
+                    'Position in Stack': 'BASIC',
+                    'Revolution Time (s)': 'BASIC',
+                    'Study Comments': 'BASIC',
+                    'Study Description': 'BASIC',
+                    'Body Area (cm²)': 'MASK'
+                    }
+
+
+def basic_dicom(image):
+    image.set_basic_dicom_info()
+
+
+def initialise_image(image):
+    image.set_array()
+
+
+def set_masking(image):
+    image.mask_and_body_segmentation()
+
+
+def set_wed(image):
+    image.calculate_ssde()
+
+
+image_processing_operations = {'1 Basic dicom': basic_dicom,
+                               '2 Initialize image': initialise_image,
+                               '3 Masking': set_masking,
+                               '4 WED': set_wed}

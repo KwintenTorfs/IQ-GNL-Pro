@@ -195,7 +195,7 @@ class Image:
                 self.set_basic_dicom_info()
                 self.set_array()
                 self.mask_and_body_segmentation()
-                self.set_tissue_fractions()
+                # self.set_tissue_fractions()
                 self.calculate_ssde()
 
     def _transform_to_hu(self, array):
@@ -406,22 +406,27 @@ class Image:
                 self.mask, self.body = body_segmentation(self.raw_hu, kwinten_threshold_list)
             except (AttributeError, PermissionError):
                 self.valid = None
+            try:
+                self.area = np.sum(self.mask) * (self.PixelSize / 10) ** 2  # Cross-sectional area of patient in cm²
+            except (AttributeError, TypeError):
+                self.area = None
 
-    def set_tissue_fractions(self):
-        try:
-            self.lung, self.fat, self.soft, self.bone = tissue_fractions(self.body)
-        except (AttributeError, TypeError):
-            self.lung, self.fat, self.soft, self.bone = None, None, None, None
+    # def set_tissue_fractions(self):
+    #     try:
+    #         self.lung, self.fat, self.soft, self.bone = tissue_fractions(self.body)
+    #     except (AttributeError, TypeError):
+    #         self.lung, self.fat, self.soft, self.bone = None, None, None, None
 
     def calculate_ssde(self):
         try:
             self.average_hu = np.nanmean(self.body)
-            self.area = np.sum(self.mask) * (self.PixelSize / 10) ** 2  # Cross-sectional area of patient in cm²
+        except (AttributeError, TypeError):
+            self.average_hu = None
+        try:
             self.WED_uncorrected = 2 * np.sqrt((1 + self.average_hu / 1000) * self.area / np.pi)  # water equivalent
             # diameter in cm
         except (AttributeError, TypeError):
-            self.average_hu, self.area, self.WED_uncorrected = None, None, np.nan
-
+            self.WED_uncorrected = np.nan
         try:
             self.truncated_fraction, self.body_contour, self.fov_contour = fraction_truncation(self.raw_hu, self.mask)
         except (AttributeError, TypeError):

@@ -8,7 +8,7 @@ from GUI.table import create_table_header, table_header, pre_and_suffix
 from GUI.export import patient_parameters, slice_parameters, study_parameters, scanner_parameters, tissue_parameters, \
     gnl_pre_text
 from Support.Hounsfield_Units import get_hounsfield_dictionary
-from Calculations.calculation_functions import calculations
+from Calculations.calculation_functions import calculations, image_processing, image_processing_operations
 from Calculations.Global_Noise import construct_noise_map, global_noise_from_noise_map, standard_slice, \
     get_kernel_in_pixel
 from configuration import ROOT_DIR
@@ -16,7 +16,6 @@ from configuration import ROOT_DIR
 path = r'D:\Quick Images\Kernel Size GNL'
 save_location = r'%s\Temporary\Test.xlsx' % ROOT_DIR
 
-parameters_that_need_masking = ['WED (cm)', 'SSDE (mGy)', 'Truncation Correction', 'Truncation']
 
 for p in patient_parameters.keys():
     patient_parameters[p] = True
@@ -26,9 +25,10 @@ for p in study_parameters.keys():
     study_parameters[p] = True
 for p in scanner_parameters.keys():
     scanner_parameters[p] = True
-tissue_parameters['GNL Soft Tissue'] = True
-tissue_parameters['GNL Lung Tissue'] = True
 
+# todo integrate into the tool
+# tissue_parameters['GNL Soft Tissue'] = True
+# tissue_parameters['GNL Lung Tissue'] = True
 
 header = table_header(False)
 # header.remove('Calculation technique')
@@ -37,24 +37,57 @@ df = pd.DataFrame(None, columns=header)
 folder_list = os.listdir(path)
 
 hounsfield_ranges = get_hounsfield_dictionary()
-gnl_calculation = False
 
+calculate_image_parameters = {'1 Basic dicom': False,
+                              '2 Initialize image': False,
+                              '3 Masking': False,
+                              '4 WED': False,
+                              '5 GNL': False}
 
+# Determine what we need to calculate
 for param in header:
     if gnl_pre_text in param:
-        gnl_calculation = True
+        for operation in calculate_image_parameters.keys():
+            calculate_image_parameters[operation] = True
         break
+    elif param in image_processing.keys():
+        if image_processing[param] == 'BASIC':
+            calculate_image_parameters['1 Basic dicom'] = True
+        elif image_processing[param] == 'MASK':
+            calculate_image_parameters['1 Basic dicom'] = True
+            calculate_image_parameters['2 Initialize image'] = True
+            calculate_image_parameters['3 Masking'] = True
+        elif image_processing[param] == 'WED':
+            calculate_image_parameters['4 WED'] = True
+            calculate_image_parameters['2 Initialize image'] = True
+            calculate_image_parameters['3 Masking'] = True
+            calculate_image_parameters['1 Basic dicom'] = True
+            break
+
+calculate_gnl = calculate_image_parameters.pop('5 GNL')
+for operation in calculate_image_parameters.copy().keys():
+    if not calculate_image_parameters[operation]:
+        calculate_image_parameters.pop(operation)
+
 
 for fol in folder_list:
-    image = Image(path, fol)
+    image = Image(path, fol, process=False)
+    for operation in calculate_image_parameters.keys():
+        image_processing_operations[operation](image)
     if not image.valid:
         continue
     selected_parameters = header
     info = dict(zip(header, [None] * len(header)))
 
     mask_size = 1  # mm
-    kernel = get_kernel_in_pixel(image.PixelSize, mask_size)
-    noise_map = construct_noise_map(image.body, mask_size=kernel)
+    try:
+        kernel = get_kernel_in_pixel(image.PixelSize, mask_size)
+    except TypeError:
+        kernel = None
+    if calculate_gnl:
+        noise_map = construct_noise_map(image.body, mask_size=kernel)
+    else:
+        noise_map = None
 
     for parameter in info.keys():
         if parameter in calculations.keys():

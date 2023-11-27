@@ -1,6 +1,8 @@
+book = {'Hallo': 10,
+        'Goodbye': 20}
 
-a = 'Hallo dit is een test'
+print(book)
 
-b = 'Hallo dit is een testa'
+book.pop('Goodbye')
 
-c = b.split(a)[1]
+print(book)
