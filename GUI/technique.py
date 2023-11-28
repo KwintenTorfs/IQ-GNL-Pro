@@ -22,7 +22,8 @@ technique_parameters = {'GNL MID AX': False,
                         'GNL X SLICE': False,
                         'NB': default_nb_slices,
                         'PER SCAN': True,
-                        'PER SLICE': False}
+                        'PER SLICE': False,
+                        'MASK': default_mask_size}
 
 disabled_buttons = {'PER SCAN DISABLE': False,
                     'PER SLICE DISABLE': False}

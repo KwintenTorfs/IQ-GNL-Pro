@@ -4,7 +4,6 @@ import numpy as np
 from Constants.design_GUI import text, various, accent, FrameFont, TitleFont, TextFont, default_button, \
     default_button_hover, accent_button, accent_button_hover, window_size, DefaultTextFont
 from Support.Hounsfield_Units import get_hounsfield_dictionary, get_original_tissues
-from configuration import GUI_ICON
 from GUI.gnl import max_customisable_gnl
 
 scanner_parameters = {'Manufacturer': True,
@@ -244,7 +243,6 @@ def update_export_tissues(window):
         if tissue in available_tissues.keys():
             available_tissues[tissue] = tissue_parameters[tissue]
     tissue_parameters = available_tissues
-    print(tissue_parameters)
 
     while i < max_gnl_boxes:
         key = '%s%s' % (gnl_pre_text, i)
@@ -261,6 +259,7 @@ def update_export_tissues(window):
 
 
 def set_all_parameters(window, parameters, end_value):
+    global GNL_dictionary, tissue_parameters
     if parameters == tissue_parameters:
         for parameter in GNL_dictionary.keys():
             window[parameter].update(end_value)
@@ -368,14 +367,15 @@ def export_events(window, event, value):
         set_all_parameters(window, scanner_parameters, False)
         set_all_parameters(window, slice_parameters, False)
         set_all_parameters(window, tissue_parameters, False)
+
     return
 
 
-def create_export_window():
-    layout = export_layout()
-    window_export = sg.Window(title='', layout=layout, size=settings_window_size, icon=GUI_ICON, finalize=True)
-    export_bindings(window_export)
-    return window_export
+# def create_export_window():
+#     layout = export_layout()
+#     window_export = sg.Window(title='', layout=layout, size=settings_window_size, icon=GUI_ICON, finalize=True)
+#     export_bindings(window_export)
+#     return window_export
 
 
 def export_bindings(window):

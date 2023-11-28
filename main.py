@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
-from GUI.export import create_export_window, export_events, export_bindings, export_layout, update_export_tissues
+from GUI.calculate import calculate_events
+from GUI.export import export_events, export_bindings, export_layout, update_export_tissues
 from GUI.folders import folders_bindings, folders_events, folders_layout, folders_parameters, list_methods, \
     method_names, \
     methods, switch_folder_method
@@ -14,7 +15,7 @@ from GUI.table import table_events, create_table_window
 from GUI.technique import technique_events, technique_layout, technique_bindings
 from configuration import GUI_ICON
 
-global folders_parameters
+# global folders_parameters
 
 sg.set_options(scaling=scaling)
 
@@ -69,10 +70,10 @@ column_left = [[sg.Text('Welcome to GNOME', justification='left', font='Calibri 
                             selected_title_color=accent, enable_events=True, key='TAB GROUP')],
                ]
 
-column_right = [[]]
+column_right = [[sg.Button('Calculate', key='CALCULATE')]]
 
 layout = [[sg.Menu(menu, text_color=text, font=MenuFont, background_color='white')],
-          [sg.Column(column_left, expand_y=True)],
+          [sg.Column(column_left, expand_y=True), sg.Column(column_right)],
           ]
 
 
@@ -154,15 +155,6 @@ while True:
         technique_events(window, event, value, window_main)
         export_events(window, event, value)
         save_events(window, event, value)
-        # tab = window_main['TAB GROUP'].get()
-        # if tab == 'Folders':
-        #     folders_events(window, event, value)
-        # elif tab == 'GNL Tissue':
-        #     gnl_events(window, event, value)
-        # elif tab == 'Measurement':
-        #     technique_events(window, event, value, window_main)
-        # elif tab == 'Export':
-        #     export_events(window, event, value)
-
+        calculate_events(window, event, value)
 
 window.close()

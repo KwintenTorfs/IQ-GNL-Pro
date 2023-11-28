@@ -27,6 +27,7 @@ folders_parameters = {'DB': True,
 enable_lists = {'DB': [True, True, True],
                 'SCAN': [False, True, True],
                 'IMAGE': [False, False, True]}
+
 methods = {'Database': 'DB',
            'Scans': 'SCAN',
            'Images': 'IMAGE'}
@@ -119,7 +120,7 @@ def folders_layout():
                                                     key='BROWSE IMAGE', button_type=sg.BUTTON_TYPE_BROWSE_FILE,
                                                     enable_events=True, target='IMAGE LOCATION'),
                                           sg.Button('Browse', button_color='white', font=TextFont, border_width=0,
-                                                    button_type=sg.BUTTON_TYPE_BROWSE_FOLDER, key='FIND IMAGE',
+                                                    button_type=sg.BUTTON_TYPE_BROWSE_FILE, key='FIND IMAGE',
                                                     size=(7, 1),
                                                     enable_events=True, target='IMAGE LOCATION')]],
                              key='FRAME IMAGE', border_width=0, size=(100, 25))],

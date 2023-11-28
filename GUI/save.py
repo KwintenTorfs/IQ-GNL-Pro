@@ -5,6 +5,7 @@ import PySimpleGUI as sg
 from Constants.Images.images_b64 import MAP, image_rescale, SAVEASWHITE
 from Constants.design_GUI import accent, TitleFont, text, TextFont, default_button, DefaultTextFont, default_text, \
     default_button_hover, light_accent, background, LargeFont, darker_grey, MenuFont
+from configuration import RESULTS_FOLDER
 
 
 def create_path(folder, file, file_type):
@@ -18,7 +19,7 @@ valid_save_files = {'Excel Workbook (*.xlsx)': '.xlsx',
 
 default_file = 'Book1'
 default_file_text = 'Enter file name here'
-default_folder = r'..\Results'
+default_folder = RESULTS_FOLDER
 default_save_type = list(valid_save_files.keys())[0]
 default_path = create_path(default_folder, default_file, default_save_type)
 
@@ -30,6 +31,25 @@ save_parameters = {'FILE TYPE': default_save_type,
 
 illegal_excel_characters = '*:?<>|"'
 darker_frame = darker_grey
+
+
+def get_save_locations():
+    """
+        Get the complete name that should be given to the data files that are saved
+    :return:
+        tuple: a tuple containing
+        - save_location_files (str): A location with the measured data per slice
+        - save_location_scans (str): A location with the measured data per scan
+    """
+    if save_parameters['DEFAULT FILE']:
+        save_filename = default_file
+    else:
+        save_filename = save_parameters['FILE']
+    save_directory = save_parameters['FOLDER']
+    save_filetype = valid_save_files[save_parameters['FILE TYPE']]
+    save_location_files = os.path.join(save_directory, save_filename) + ' (per slice)' + save_filetype
+    save_location_scans = os.path.join(save_directory, save_filename) + save_filetype
+    return save_location_files, save_location_scans
 
 
 def save_layout():

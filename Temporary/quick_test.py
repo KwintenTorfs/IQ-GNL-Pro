@@ -1,8 +1,3 @@
-book = {'Hallo': 10,
-        'Goodbye': 20}
+import os
 
-print(book)
-
-book.pop('Goodbye')
-
-print(book)
+d = {}

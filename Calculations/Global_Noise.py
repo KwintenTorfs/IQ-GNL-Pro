@@ -11,35 +11,63 @@ samei_mask_size = 6  # mm
 standard_slice = {'3mm': 3}
 
 
-def get_kernel_in_pixel(pixel_in_mm, kernel_in_mm):
-    # For a fixed kernel size (in mm), return the kernel size in (odd) number of pixels
+def get_kernel_in_pixel(pixel_in_mm: float, kernel_in_mm: float):
+    """
+                For a kernel size in mm, return the kernel size in (odd) number of pixels
+
+                Parameters
+                ----------
+                pixel_in_mm : float
+                    Size of one pixel in mm
+                kernel_in_mm: float
+                    Size of the noise mask in mm
+
+                Returns
+                -------
+                int:
+                    Noise mask expressed as an odd number of pixels (int)
+        """
     pixels_in_kernel = kernel_in_mm / pixel_in_mm
     odd_kernels = (pixels_in_kernel - 1) / 2
     odd_pixel_kernel = (np.round(odd_kernels, 0) * 2 + 1).astype(int)
     return odd_pixel_kernel
 
 
-def extend_matrix_2d(matrix, radius):
-    # For any convolution calculation, the matrix needs to be extended to allow convolution in the image borders
-    #   Radius is the radius of the mask array (e.g. for 3x3, radius = 1)
+def extend_matrix_2d(matrix: np.ndarray, extend_px: int):
+    """
+        For any convolution calculation, the matrix needs to be extended to allow convolution in the image borders.
+        Therefore, a border is added to the image with values comparable to the nearest pixel in the original image
+
+        Parameters
+        ----------
+        matrix : ndarray
+            Current image
+        extend_px: int
+            Amount of pixels that the matrix extends at all sides
+
+        Returns
+        -------
+        ndarray: extended_image
+            -extended_image (np.ndarray): Matrix with the extended image
+    """
     [dy, dx] = matrix.shape
-    extended_image = np.zeros([dy + 2 * radius, dx + 2 * radius])
+    extended_image = np.zeros([dy + 2 * extend_px, dx + 2 * extend_px])
 
     # Center ofr the extended image is the current image
-    extended_image[radius:dy + radius, radius:dx + radius] = matrix
+    extended_image[extend_px:dy + extend_px, extend_px:dx + extend_px] = matrix
 
     # Each corner is extended as the current corner pixel
-    extended_image[0:radius, 0:radius] = matrix[0, 0]
-    extended_image[radius + dy:, 0:radius] = matrix[dy - 1, 0]
-    extended_image[0:radius, radius + dx:] = matrix[0, dx - 1]
-    extended_image[radius + dy:, radius + dx:] = matrix[dy - 1, dx - 1]
+    extended_image[0:extend_px, 0:extend_px] = matrix[0, 0]
+    extended_image[extend_px + dy:, 0:extend_px] = matrix[dy - 1, 0]
+    extended_image[0:extend_px, extend_px + dx:] = matrix[0, dx - 1]
+    extended_image[extend_px + dy:, extend_px + dx:] = matrix[dy - 1, dx - 1]
 
     # The borders are extended outwards with the corresponding values of
-    for i in range(radius):
-        extended_image[radius:radius + dy, i] = matrix[0:dy, 0]
-        extended_image[i, radius:radius + dx] = matrix[0, 0:dx]
-        extended_image[radius:radius + dy, i + radius + dx] = matrix[0:dy, dx - 1]
-        extended_image[i + radius + dy, radius:radius + dx] = matrix[dy - 1, 0:dx]
+    for i in range(extend_px):
+        extended_image[extend_px:extend_px + dy, i] = matrix[0:dy, 0]
+        extended_image[i, extend_px:extend_px + dx] = matrix[0, 0:dx]
+        extended_image[extend_px:extend_px + dy, i + extend_px + dx] = matrix[0:dy, dx - 1]
+        extended_image[i + extend_px + dy, extend_px:extend_px + dx] = matrix[dy - 1, 0:dx]
     return extended_image
 
 
@@ -124,11 +152,3 @@ def global_noise_from_noise_map(image, noise_map, hounsfield_range):
     except ValueError:
         gnl_mode, gnl_median = None, None
     return gnl_mode, gnl_median
-
-####
-#
-#  GNL Correction for Slice Thickness   SD ~ 1 / sqrt(ST)
-#
-#  Use Correction to normalise GNL
-#
-###

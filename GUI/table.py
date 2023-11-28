@@ -1,10 +1,11 @@
 import PySimpleGUI as sg
 
 from Constants.design_GUI import accent, light_accent, text, various, FrameFont, window_size
-from GUI.export import patient_parameters, tissue_parameters, slice_parameters, scanner_parameters, \
+from GUI.export import patient_parameters, slice_parameters, scanner_parameters, \
     study_parameters, gnl_pre_text
-from GUI.technique import technique_parameters
+import GUI.export
 from configuration import GUI_ICON
+import GUI.technique
 from Calculations.Global_Noise import standard_slice
 
 settings_window_size = (int(0.45 * window_size[0]), int(0.4 * window_size[1]))
@@ -21,7 +22,20 @@ pre_and_suffix = {'AVG': 'AVG ',
                   'KERNEL': 'Mask Kernel (px)'}
 
 
-def table_header(measure_per_scan):
+def table_header(measure_per_scan: bool):
+    """
+        Create a header for a datatable of all parameters that are selected in the export parameters tab
+
+        Parameters
+        ----------
+        measure_per_scan : bool
+            Create table header for a table of scan averages or individual slices (False)
+        Returns
+        -------
+        list: a list containing
+            -header (list[str]) : a list of all parameters of data in the table
+    """
+
     header = []
     if measure_per_scan:
         header.append('Calculation technique')
@@ -29,8 +43,8 @@ def table_header(measure_per_scan):
             if slice_parameters[parameter]:
                 header.append('%s%s' % (pre_and_suffix['AVG'], parameter))
                 header.append('%s%s' % (pre_and_suffix['STD'], parameter))
-        for parameter in tissue_parameters.keys():
-            if tissue_parameters[parameter]:
+        for parameter in GUI.export.tissue_parameters.keys():
+            if GUI.export.tissue_parameters[parameter]:
                 tissue = parameter.split(gnl_pre_text)[1]
                 header.append('%s%s%s' % (pre_and_suffix['AVG'], parameter, pre_and_suffix['HU']))
                 header.append('%s%s%s' % (pre_and_suffix['STD'], parameter, pre_and_suffix['HU']))
@@ -41,8 +55,8 @@ def table_header(measure_per_scan):
         for parameter in slice_parameters.keys():
             if slice_parameters[parameter]:
                 header.append(parameter)
-        for parameter in tissue_parameters.keys():
-            if tissue_parameters[parameter]:
+        for parameter in GUI.export.tissue_parameters.keys():
+            if GUI.export.tissue_parameters[parameter]:
                 tissue = parameter.split(gnl_pre_text)[1]
                 header.append('%s%s%s' % (parameter, pre_and_suffix['STD SLICE'], pre_and_suffix['HU']))
                 header.append('%s%s' % (parameter, pre_and_suffix['HU']))
@@ -50,7 +64,7 @@ def table_header(measure_per_scan):
                 header.append('%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU']))
                 header.append('%s%s' % (tissue, pre_and_suffix['AREA']))
                 header.append('%s%s' % (tissue, pre_and_suffix['PERC']))
-    if True in tissue_parameters.values():
+    if True in GUI.export.tissue_parameters.values():
         header.append('%s' % pre_and_suffix['MASK'])
         header.append('%s' % pre_and_suffix['KERNEL'])
     for parameter in study_parameters.keys():
@@ -66,7 +80,7 @@ def table_header(measure_per_scan):
 
 
 def create_table_header():
-    measure_per_scan = technique_parameters['PER SCAN']
+    measure_per_scan = GUI.technique.technique_parameters['PER SCAN']
     header = table_header(measure_per_scan)
     header_file = None
     if not measure_per_scan:
