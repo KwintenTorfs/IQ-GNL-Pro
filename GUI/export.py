@@ -19,7 +19,6 @@ scanner_parameters = {'Manufacturer': True,
 patient_parameters = {'Patient Sex': False,
                       'Patient Age (y)': False,
                       'Body Part Examined': False,
-                      # 'PACSID': False,
                       'Patient ID': False,
                       }
 
@@ -36,14 +35,14 @@ study_parameters = {'kVp': True,
                     'Study Date': False,
                     'Exposure Time (ms)': False,
                     'Revolution Time (s)': False,
-                    'Folder': False,
+                    'Folder': True,
                     'Matrix Size': False,
                     'Study Comments': False,
                     'Study Description': False,
-                    'Path': False
+                    'Path': True
                     }
 
-slice_parameters = {'Slice Number': False,
+slice_parameters = {'Slice Number': True,
                     'mAs': True,
                     'mA': False,
                     'CTDI (mGy)': False,
@@ -51,7 +50,7 @@ slice_parameters = {'Slice Number': False,
                     'WED (cm)': False,
                     'Truncation Correction': False,
                     'Truncation Fraction': False,
-                    'File': False,
+                    'File': True,
                     'Position in Stack': False,
                     'Body Area (cm²)': False}
 
@@ -262,8 +261,10 @@ def set_all_parameters(window, parameters, end_value):
     global GNL_dictionary, tissue_parameters
     if parameters == tissue_parameters:
         for parameter in GNL_dictionary.keys():
-            window[parameter].update(end_value)
-            parameters[GNL_dictionary[parameter]] = end_value
+            tissue_param = GNL_dictionary[parameter]
+            if tissue_param:
+                window[parameter].update(end_value)
+                parameters[GNL_dictionary[parameter]] = end_value
     else:
         for parameter in parameters.keys():
             window[parameter].update(end_value)

@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
-from GUI.calculate import calculate_events
+import GUI.export
+from GUI.calculate import calculate_events, calculate_layout
 from GUI.export import export_events, export_bindings, export_layout, update_export_tissues
 from GUI.folders import folders_bindings, folders_events, folders_layout, folders_parameters, list_methods, \
     method_names, \
@@ -70,10 +71,11 @@ column_left = [[sg.Text('Welcome to GNOME', justification='left', font='Calibri 
                             selected_title_color=accent, enable_events=True, key='TAB GROUP')],
                ]
 
-column_right = [[sg.Button('Calculate', key='CALCULATE')]]
+# column_right = [[sg.Button('Calculate', key='CALCULATE')]]
 
 layout = [[sg.Menu(menu, text_color=text, font=MenuFont, background_color='white')],
-          [sg.Column(column_left, expand_y=True), sg.Column(column_right)],
+          [sg.Column(column_left, expand_y=True, expand_x=True),
+           sg.Column(calculate_layout(), expand_y=True, expand_x=True)],
           ]
 
 
@@ -156,5 +158,4 @@ while True:
         export_events(window, event, value)
         save_events(window, event, value)
         calculate_events(window, event, value)
-
 window.close()

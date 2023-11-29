@@ -1,14 +1,24 @@
 import os.path
+import threading
 
-import GUI.export
+import PySimpleGUI as sg
 from Calculations.Image_Import import Image
+from Constants.design_GUI import text, TextFont
 from GUI.folders import folders_parameters, methods
 from GUI.technique import technique_parameters
-from GUI.calculation import table_header, process_list_of_image_slices, necessary_image_class_calculations
+from GUI.calculation import table_header, process_list_of_image_slices, necessary_image_class_calculations, log
 from GUI.save import get_save_locations
 import pandas as pd
 
 from Support.Hounsfield_Units import get_hounsfield_dictionary
+
+
+def calculate_layout():
+    layout = [[sg.Multiline(key='LOG', text_color=text, font=TextFont, expand_x=True, expand_y=True,
+                            autoscroll=True, write_only=True, disabled=True)],
+              [sg.Push(),
+               sg.Button('Calculate', key='CALCULATE', button_color=(text, 'white'), font=TextFont)]]
+    return layout
 
 
 def calculate_events(window, event, value):
@@ -16,18 +26,33 @@ def calculate_events(window, event, value):
         # todo Give a notification if you are still in default save location or filename
         # todo Give a check whether a certain file already exists + override or not
         # todo
+        log(window, '-' * 130)
+        log(window, 'CALCULATION STARTED')
+        log(window, '-' * 130)
+        log(window, 'SETTINGS')
         type_of_input = input_folder_type()
+        log(window, '\t\t Input type: \t\t %s' % type_of_input)
         source_paths = folders_parameters['%s FILES' % type_of_input][0]
         slices_header = table_header(False)
         calculate_gnl, image_param = necessary_image_class_calculations(slices_header)
         dataframe_slice = pd.DataFrame(data=None, columns=slices_header)
         calculate_per_scan = calculation_per_scan()
+        log(window, '\t\t Avg per scan: \t\t %s' % calculate_per_scan)
         hounsfield_ranges = get_hounsfield_dictionary()
         save_location_files, save_location_scans = get_save_locations()
+        log(window, '\t\t Save location: \t\t %s' % save_location_scans)
+        log(window, 'PARAMETERS')
+        for parameter in slices_header:
+            log(window, '\t\t %s: \t\t %s' % (parameter, True))
+        log(window, '-' * 130)
         if not calculate_per_scan:
+            log(window, 'START SLICE MEASUREMENT')
             images = images_for_measurement_per_slice(type_of_input, source_paths)
-            _ = process_list_of_image_slices(images, dataframe_slice, hounsfield_ranges,
-                                             save_location_files, image_param, calculate_gnl)
+            log(window, 'Number of images to process: %i' % len(images))
+            threading.Thread(target=process_list_of_image_slices,
+                             args=(images, dataframe_slice, hounsfield_ranges, save_location_files, image_param,
+                                   calculate_gnl, window),
+                             daemon=True).start()
 
         else:
             folders = folders_for_measurement_per_scan(type_of_input, source_paths)

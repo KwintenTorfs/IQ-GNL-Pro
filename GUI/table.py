@@ -15,11 +15,13 @@ pre_and_suffix = {'AVG': 'AVG ',
                   'HU': ' (HU)',
                   'LOW': ' - Low',
                   'HIGH': ' - High',
-                  'STD SLICE': ' - per %s' % list(standard_slice.keys())[0],
+                  'STD SLICE': ' - ST %s' % list(standard_slice.keys())[0],
                   'AREA': ' Area (cm²)',
                   'PERC': ' in body (%)',
                   'MASK': 'Mask Kernel (mm)',
                   'KERNEL': 'Mask Kernel (px)'}
+
+non_averageable_parameters = ['Slice Number', 'File', 'Position in Stack', '']
 
 
 def table_header(measure_per_scan: bool):
@@ -38,14 +40,19 @@ def table_header(measure_per_scan: bool):
 
     header = []
     if measure_per_scan:
-        header.append('Calculation technique')
+        header.append('Calculation Method')
+        header.append('NB Slices')
         for parameter in slice_parameters.keys():
-            if slice_parameters[parameter]:
+            if slice_parameters[parameter] and parameter not in non_averageable_parameters:
                 header.append('%s%s' % (pre_and_suffix['AVG'], parameter))
                 header.append('%s%s' % (pre_and_suffix['STD'], parameter))
         for parameter in GUI.export.tissue_parameters.keys():
             if GUI.export.tissue_parameters[parameter]:
                 tissue = parameter.split(gnl_pre_text)[1]
+                header.append('%s%s%s%s' % (pre_and_suffix['AVG'], parameter, pre_and_suffix['STD SLICE'],
+                                            pre_and_suffix['HU']))
+                header.append('%s%s%s%s' % (pre_and_suffix['STD'], parameter, pre_and_suffix['STD SLICE'],
+                                            pre_and_suffix['HU']))
                 header.append('%s%s%s' % (pre_and_suffix['AVG'], parameter, pre_and_suffix['HU']))
                 header.append('%s%s%s' % (pre_and_suffix['STD'], parameter, pre_and_suffix['HU']))
                 header.append('%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU']))

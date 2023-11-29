@@ -1,5 +1,8 @@
+import datetime
+
 import numpy as np
 import pandas as pd
+
 from GUI.table import table_header, pre_and_suffix
 from GUI.export import gnl_pre_text
 from GUI.technique import technique_parameters
@@ -61,21 +64,24 @@ def necessary_image_class_calculations(heading: list[str]):
 
 
 def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
-                                 calculate_image_parameters, calculate_gnl):
+                                 calculate_image_parameters, calculate_gnl, window):
     # Heading gives all parameters that need to be calculated
+    log(window, 'BEGIN PROCESSING...')
     heading = list(slice_dataframe.head())
     mask_size = float(technique_parameters['MASK'])
-    data = []
-    for image in image_slices:
+    data = pd.DataFrame(data=None, columns=heading)
+    nb_images = len(image_slices)
+    string_image = '%%0%id' % len(str(nb_images))
+    for i, image in enumerate(image_slices):
         # Here we do the different operations in the IMAGE class that are necessary to retrieve all info
         for operation in calculate_image_parameters.keys():
             image_processing_operations[operation](image)
         # If the Image Class is not valid, we can not do anything with it
         if not image.valid:
+            log(window, image.filename + ' ---------> NOT VALID')
             continue
 
         info = dict(zip(heading, [None] * len(heading)))
-        print(image.PixelSize)
         try:
             kernel = get_kernel_in_pixel(image.PixelSize, mask_size)
         except TypeError:
@@ -107,15 +113,23 @@ def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_range
                     info['%s%s%s%s' % (gnl_pre_text, tissue, pre_and_suffix['STD SLICE'], pre_and_suffix['HU'])] = \
                         gnl_mode * np.sqrt(standard_slice[list(standard_slice.keys())[0]]) / np.sqrt(image.SliceThickness)
                 except TypeError:
+                    log(window, 'TypeError  --->  GNL %s = None' % tissue)
                     info['%s%s%s%s' % (gnl_pre_text, tissue, pre_and_suffix['STD SLICE'], pre_and_suffix['HU'])] = None
 
             elif parameter == pre_and_suffix['MASK']:
                 info[pre_and_suffix['KERNEL']] = kernel
                 info[pre_and_suffix['MASK']] = mask_size
+
         # Add information to dataframe and matrix
         slice_dataframe.loc[len(slice_dataframe)] = info.values()
-        data.append(list(info.values()))
-        slice_dataframe.to_excel(save_location, sheet_name="Info per slice")
+        data.loc[len(data)] = info.values()
+        try:
+            slice_dataframe.to_excel(save_location, sheet_name="Info per slice")
+        except PermissionError:
+            log(window, 'PERMISSION ERROR -----> Save file is opened somewhere else')
+            break
+        log(window, string_image % i + '/%i  ' % nb_images + image.filename + '  added to save location')
+    log(window, 'PROCESSING FINISHED')
     return data
 
 
@@ -148,3 +162,12 @@ def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_range
 # gnl_calculation, image_param = necessary_image_class_calculations(header)
 #
 # DATA = process_list_of_image_slices(calculation_slices, dataframe_slices, hounsfield_ranges, save_location=save_location)
+def log(window, message, timestamp=True):
+    now = datetime.datetime.now()
+    prefix = ''
+    if timestamp:
+        date = '%04d-%02d-%02d' % (now.year, now.month, now.day)
+        time = '%02d:%02d:%02d' % (now.hour, now.minute, now.second)
+        prefix = date + '  ' + time + '   '
+    # todo remove comment
+    # window['LOG'].update(prefix + message+'\n', append=True)
