@@ -237,7 +237,7 @@ class Image:
             try:
                 self.CTDI_vol = np.round(self.dicom.CTDIvol, 2)
             except (AttributeError, TypeError):
-                self.CTDI_vol = None
+                self.CTDI_vol = np.nan
             try:
                 self.manufacturer = self.dicom.Manufacturer
             except AttributeError:
@@ -409,7 +409,7 @@ class Image:
             try:
                 self.area = np.sum(self.mask) * (self.PixelSize / 10) ** 2  # Cross-sectional area of patient in cm²
             except (AttributeError, TypeError):
-                self.area = None
+                self.area = np.nan
 
     # def set_tissue_fractions(self):
     #     try:
@@ -421,7 +421,7 @@ class Image:
         try:
             self.average_hu = np.nanmean(self.body)
         except (AttributeError, TypeError):
-            self.average_hu = None
+            self.average_hu = np.nan
         try:
             self.WED_uncorrected = 2 * np.sqrt((1 + self.average_hu / 1000) * self.area / np.pi)  # water equivalent
             # diameter in cm
@@ -430,17 +430,17 @@ class Image:
         try:
             self.truncated_fraction, self.body_contour, self.fov_contour = fraction_truncation(self.raw_hu, self.mask)
         except (AttributeError, TypeError):
-            self.truncated_fraction, self.body_contour, self.fov_contour = None, None, None
+            self.truncated_fraction, self.body_contour, self.fov_contour = np.nan, np.nan, np.nan
         try:
             self.WED, self.WED_correction_factor = \
                 wed_truncation_correction(self.WED_uncorrected, self.truncated_fraction)
         except (AttributeError, TypeError):
-            self.WED, self.WED_correction_factor = self.WED_uncorrected, None
+            self.WED, self.WED_correction_factor = self.WED_uncorrected, np.nan
         try:
             self.f = conversion_factor(self.WED, self.ctdi_phantom)  # ssde conversion factor in cm-1
             self.SSDE = self.f * self.CTDI_vol
         except (AttributeError, TypeError):
-            self.f, self.SSDE = None, None
+            self.f, self.SSDE = np.nan, np.nan
 
     def set_global_noise(self, global_noise):
         self.global_noise = global_noise

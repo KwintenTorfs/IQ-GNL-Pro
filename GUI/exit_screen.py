@@ -184,9 +184,7 @@ def sure_you_want_to_close():
             window['-IN-'].update(text_color=text)
         if value['-IN-'] != default_file_text:
             window['-IN-'].update(text_color=text)
-        # filename = value['-IN-']
-        # folder = value['-FOLDER-']
-        # save_type = value['File Type']
+
     window.close()
 
     return close_program, save

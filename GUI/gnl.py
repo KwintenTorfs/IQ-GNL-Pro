@@ -3,7 +3,7 @@ import numpy as np
 
 from Constants.Images.images_b64 import image_rescale, INFINITY, MIN_INFINITY, TISSUEWHITE, TISSUEREMOVEWHITE
 from Constants.design_GUI import text, various, accent, light_accent, FrameFont, TitleFont, ButtonFont, TextFont, \
-    default_button, default_button_hover, accent_button, accent_button_hover, window_size, MenuFont, darker_grey
+    default_button_hover, accent_button, window_size, MenuFont, darker_grey
 from configuration import GUI_ICON
 from Support.Hounsfield_Units import get_original_hu_ranges, get_hounsfield_dictionary, add_hounsfield_range, \
     drop_hounsfield_tissue, hu_str2float, hu_float2str, infinity

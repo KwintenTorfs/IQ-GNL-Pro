@@ -1,16 +1,14 @@
 import datetime
-
+import os
 import numpy as np
 import pandas as pd
-
-from GUI.table import table_header, pre_and_suffix
+from GUI.save import operations_save
+from GUI.table import pre_and_suffix
 from GUI.export import gnl_pre_text
 from GUI.technique import technique_parameters
-from Support.Hounsfield_Units import get_hounsfield_dictionary
 from Calculations.calculation_functions import calculations, image_processing, image_processing_operations
 from Calculations.Global_Noise import construct_noise_map, global_noise_from_noise_map, standard_slice, \
     get_kernel_in_pixel
-from configuration import ROOT_DIR
 from GUI.calculation_folders_to_files import get_calculable_slices
 
 processing_steps = {'1 Basic dicom': False,
@@ -64,9 +62,8 @@ def necessary_image_class_calculations(heading: list[str]):
 
 
 def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
-                                 calculate_image_parameters, calculate_gnl, window):
+                                 calculate_image_parameters, calculate_gnl, window, save_type):
     # Heading gives all parameters that need to be calculated
-    log(window, 'BEGIN PROCESSING...')
     heading = list(slice_dataframe.head())
     mask_size = float(technique_parameters['MASK'])
     data = pd.DataFrame(data=None, columns=heading)
@@ -124,44 +121,70 @@ def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_range
         slice_dataframe.loc[len(slice_dataframe)] = info.values()
         data.loc[len(data)] = info.values()
         try:
-            slice_dataframe.to_excel(save_location, sheet_name="Info per slice")
+            # slice_dataframe.to_excel(save_location, sheet_name="Info per slice")
+            operations_save[save_type](slice_dataframe, save_location)
         except PermissionError:
-            log(window, 'PERMISSION ERROR -----> Save file is opened somewhere else')
+            log(window, 'PERMISSION ERROR -----> Save file PER SLICE is opened somewhere else')
             break
-        log(window, string_image % i + '/%i  ' % nb_images + image.filename + '  added to save location')
-    log(window, 'PROCESSING FINISHED')
+        log(window, string_image % (i + 1) + '/%i  ' % nb_images + image.filename + '  added to save location')
     return data
 
 
-# path = r'D:\Quick Images\Test Chest\Test 9'
-# save_location = r'%s\Temporary\Test.xlsx' % ROOT_DIR
-#
-#
-# for p in patient_parameters.keys():
-#     patient_parameters[p] = True
-# for p in slice_parameters.keys():
-#     slice_parameters[p] = True
-# for p in study_parameters.keys():
-#     study_parameters[p] = True
-# for p in scanner_parameters.keys():
-#     scanner_parameters[p] = True
-# slice_parameters['Slice Number'] = True
-# tissue_parameters['GNL Soft Tissue'] = True
-# # tissue_parameters['GNL Lung Tissue'] = True
-# technique_parameters['GNL 10 SLICE'] = True
-# technique_parameters['GNL X SLICE'] = True
-#
-# header = table_header(False)
-# # header.remove('Calculation technique')
-# dataframe_slices = pd.DataFrame(None, columns=header)
-# calculation_slices, calculation_positions = get_calculable_slices(path)
-#
-# hounsfield_ranges = get_hounsfield_dictionary()
-#
-# mask_size = technique_parameters['MASK']   # mm
-# gnl_calculation, image_param = necessary_image_class_calculations(header)
-#
-# DATA = process_list_of_image_slices(calculation_slices, dataframe_slices, hounsfield_ranges, save_location=save_location)
+def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, hounsfield_ranges, save_location_files,
+                            save_location_scans, image_param, calculate_gnl, window, save_type):
+    header_scan = list(scan_dataframe.head())
+    nb_folders = len(source_paths)
+    string_folder = '%%0%id' % len(str(nb_folders))
+    for i, folder in enumerate(source_paths):
+        slices, measurements = get_calculable_slices(folder)
+        data = process_list_of_image_slices(image_slices=slices,
+                                            slice_dataframe=slice_dataframe,
+                                            hounsfield_ranges=hounsfield_ranges,
+                                            save_location=save_location_files,
+                                            calculate_image_parameters=image_param,
+                                            calculate_gnl=calculate_gnl,
+                                            window=window,
+                                            save_type=save_type)
+
+        for method in measurements.keys():
+            nb_slices = len(measurements[method])
+            if nb_slices < 1:
+                continue
+            scan_info = dict(zip(header_scan, [None] * len(header_scan)))
+            for parameter in scan_info.keys():
+                if pre_and_suffix['AVG'] in parameter:
+                    original_parameter = parameter.split(pre_and_suffix['AVG'])[1]
+                    parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
+                    try:
+                        scan_info[pre_and_suffix['AVG'] + original_parameter] = np.nanmean(parameter_array)
+                    except RuntimeWarning:
+                        scan_info[pre_and_suffix['AVG'] + original_parameter] = None
+                    try:
+                        scan_info[pre_and_suffix['STD'] + original_parameter] = np.nanstd(parameter_array)
+                    except RuntimeWarning:
+                        scan_info[pre_and_suffix['STD'] + original_parameter] = None
+                elif pre_and_suffix['STD'] in parameter:
+                    pass
+                elif parameter == 'Calculation Method':
+                    scan_info[parameter] = method
+                elif parameter == 'NB Slices':
+                    scan_info[parameter] = nb_slices
+                elif parameter == 'Path':
+                    scan_info[parameter] = folder
+                else:
+                    scan_info[parameter] = data[parameter][0]
+            scan_dataframe.loc[len(scan_dataframe)] = scan_info.values()
+            try:
+                operations_save[save_type](scan_dataframe, save_location_scans)
+                # scan_dataframe.to_excel(save_location_scans)
+            except PermissionError:
+                log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
+
+        log(window, '')
+        log(window, string_folder % (i + 1) + '/%i  ' % nb_folders + folder + '  PROCESSED')
+        log(window, '')
+
+
 def log(window, message, timestamp=True):
     now = datetime.datetime.now()
     prefix = ''
@@ -169,5 +192,19 @@ def log(window, message, timestamp=True):
         date = '%04d-%02d-%02d' % (now.year, now.month, now.day)
         time = '%02d:%02d:%02d' % (now.hour, now.minute, now.second)
         prefix = date + '  ' + time + '   '
-    # todo remove comment
-    # window['LOG'].update(prefix + message+'\n', append=True)
+    window['LOG'].update(prefix + message+'\n', append=True)
+    add_to_active_log(prefix + message)
+
+
+def create_log():
+    open('current_log.txt', 'w')
+
+
+def add_to_active_log(log_string):
+    if os.path.exists('current_log.txt'):
+        f = open('current_log.txt', 'a')
+    else:
+        f = open('current_log.txt', 'w')
+    f.write(log_string + '\n')
+    f.close()
+    return

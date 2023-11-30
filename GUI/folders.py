@@ -3,10 +3,11 @@ import threading
 
 import PySimpleGUI as sg
 import numpy as np
+from natsort import natsorted
 
 from Constants.Images.images_b64 import image_rescale, FOLDERBROWSEWHITE, FOLDERADDWHITE
 from Constants.design_GUI import TitleFont, accent, window_size, TextFont, text, various, default_button, \
-    light_accent, default_button_hover, accent_button, accent_button_hover, LargeFont
+    light_accent, default_button_hover, accent_button, accent_button_hover
 from GUI.popups import popup_yes_no
 from GUI.save import darker_frame
 from configuration import GUI_ICON
@@ -194,7 +195,10 @@ def set_all_lists(window):
     global folders_parameters
     for method in list_methods:
         files = "%s FILES" % method
-        window[files].update(values=folders_parameters[files][1])
+        print(folders_parameters[files][0])
+        print(folders_parameters[files][1])
+        updated_files = natsorted(folders_parameters[files][1])
+        window[files].update(values=updated_files)
 
 
 def folders_events(window, event, value):
@@ -296,16 +300,16 @@ def folders_events(window, event, value):
 
         # Operation 2 = when selecting a value in DB => shows the sub-folders in SCAN
         elif 'DB' in event and folders_parameters['DB']:
-            files_in_map = os.listdir(current_location)
+            folders_in_map = os.listdir(current_location)
             locations_in_map = []
-            for file in files_in_map.copy():
+            for file in folders_in_map.copy():
                 scan_location = os.path.join(current_location, file)
                 if os.path.isdir(scan_location):
                     locations_in_map.append(scan_location)
                 else:
-                    files_in_map.remove(file)
+                    folders_in_map.remove(file)
             folders_parameters['SCAN FILES'][0] = locations_in_map
-            folders_parameters['SCAN FILES'][1] = files_in_map
+            folders_parameters['SCAN FILES'][1] = folders_in_map
             set_all_lists(window)
             window['DB FILES'].update(set_to_index=index)
             window['IMAGE FILES'].update(values=[])
@@ -351,7 +355,8 @@ def switch_folder_method(window, event):
     if folders_parameters[event]:
         return
     else:
-        switch_method = popup_yes_no('Are you sure you want to switch methods?')
+        switch_method = popup_yes_no('You are about to switch folder type.\nAre you sure you want to switch?',
+                                     'Confirm Folder Type')
         if switch_method:
             swipe_lists(window)
             db, sc, im = enable_lists[event]
@@ -506,6 +511,7 @@ def popup(message):
 
 def add_siblings(window, selected_siblings, parent_location, files):
     global folders_parameters
+    selected_siblings = selected_siblings
     for selected_sibling in selected_siblings:
         location = os.path.join(parent_location, selected_sibling)
         if location not in folders_parameters[files][0]:

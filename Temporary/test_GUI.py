@@ -5,7 +5,7 @@ import pandas as pd
 
 import GUI.export
 from GUI.calculate import images_for_measurement_per_slice
-from GUI.calculation import process_list_of_image_slices, necessary_image_class_calculations
+from GUI.calculation import process_list_of_image_slices, necessary_image_class_calculations, process_list_of_folders
 from GUI.calculation_folders_to_files import get_calculable_slices
 from GUI.save import get_save_locations
 from GUI.table import table_header, pre_and_suffix
@@ -26,13 +26,13 @@ SCAN2 = r'D:\Database - ERPW Project\Databases\Patient\Patients - Conventional\P
 #     GUI.export.scanner_parameters[p] = True
 GUI.export.tissue_parameters['GNL Soft Tissue'] = True
 technique_parameters['GNL MID AX'] = True
-technique_parameters['GNL 10 SLICE'] = True
+technique_parameters['GNL 10 SLICE'] = False
 technique_parameters['GNL X SLICE'] = True
 technique_parameters['GNL ALL SLICE'] = False
 technique_parameters['NB'] = 5
 
 type_of_input = 'SCAN'
-source_paths = [SCAN2]
+source_paths = [SCAN, SCAN2]
 save_location_files, save_location_scans = get_save_locations()
 slices_header = table_header(False)
 header_scan = table_header(True)
@@ -40,38 +40,39 @@ calculate_gnl, image_param = necessary_image_class_calculations(slices_header)
 slice_dataframe = pd.DataFrame(data=None, columns=slices_header)
 hounsfield_ranges = get_hounsfield_dictionary()
 scan_dataframe = pd.DataFrame(data=None, columns=header_scan)
-for folder in source_paths:
-    slices, measurements = get_calculable_slices(folder)
-    data = process_list_of_image_slices(image_slices=slices,
-                                        slice_dataframe=slice_dataframe,
-                                        hounsfield_ranges=hounsfield_ranges,
-                                        save_location=save_location_files,
-                                        calculate_image_parameters=image_param,
-                                        calculate_gnl=calculate_gnl,
-                                        window=None)
-
-    for method in measurements.keys():
-        nb_slices = len(measurements[method])
-        if nb_slices < 1:
-            continue
-        scan_info = dict(zip(header_scan, [None] * len(header_scan)))
-        for parameter in scan_info.keys():
-            if pre_and_suffix['AVG'] in parameter:
-                original_parameter = parameter.split(pre_and_suffix['AVG'])[1]
-                position_in_data = slices_header.index(original_parameter)
-                parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
-                scan_info[pre_and_suffix['AVG'] + original_parameter] = np.nanmean(parameter_array)
-                scan_info[pre_and_suffix['STD'] + original_parameter] = np.nanstd(parameter_array)
-            elif pre_and_suffix['STD'] in parameter:
-                pass
-            elif parameter == 'Calculation Method':
-                scan_info[parameter] = method
-            elif parameter == 'NB Slices':
-                scan_info[parameter] = nb_slices
-            elif parameter == 'Path':
-                scan_info[parameter] = os.path.dirname(data[parameter][0])
-            else:
-                scan_info[parameter] = data[parameter][0]
-
-        scan_dataframe.loc[len(scan_dataframe)] = scan_info.values()
-        scan_dataframe.to_excel(save_location_scans)
+process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, hounsfield_ranges, save_location_files, save_location_scans, image_param, calculate_gnl, window=None)
+# for folder in source_paths:
+#     slices, measurements = get_calculable_slices(folder)
+#     data = process_list_of_image_slices(image_slices=slices,
+#                                         slice_dataframe=slice_dataframe,
+#                                         hounsfield_ranges=hounsfield_ranges,
+#                                         save_location=save_location_files,
+#                                         calculate_image_parameters=image_param,
+#                                         calculate_gnl=calculate_gnl,
+#                                         window=None)
+#
+#     for method in measurements.keys():
+#         nb_slices = len(measurements[method])
+#         if nb_slices < 1:
+#             continue
+#         scan_info = dict(zip(header_scan, [None] * len(header_scan)))
+#         for parameter in scan_info.keys():
+#             if pre_and_suffix['AVG'] in parameter:
+#                 original_parameter = parameter.split(pre_and_suffix['AVG'])[1]
+#                 position_in_data = slices_header.index(original_parameter)
+#                 parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
+#                 scan_info[pre_and_suffix['AVG'] + original_parameter] = np.nanmean(parameter_array)
+#                 scan_info[pre_and_suffix['STD'] + original_parameter] = np.nanstd(parameter_array)
+#             elif pre_and_suffix['STD'] in parameter:
+#                 pass
+#             elif parameter == 'Calculation Method':
+#                 scan_info[parameter] = method
+#             elif parameter == 'NB Slices':
+#                 scan_info[parameter] = nb_slices
+#             elif parameter == 'Path':
+#                 scan_info[parameter] = os.path.dirname(data[parameter][0])
+#             else:
+#                 scan_info[parameter] = data[parameter][0]
+#
+#         scan_dataframe.loc[len(scan_dataframe)] = scan_info.values()
+#         scan_dataframe.to_excel(save_location_scans)

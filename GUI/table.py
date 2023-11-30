@@ -57,6 +57,10 @@ def table_header(measure_per_scan: bool):
                 header.append('%s%s%s' % (pre_and_suffix['STD'], parameter, pre_and_suffix['HU']))
                 header.append('%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU']))
                 header.append('%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU']))
+                header.append('%s%s%s' % (pre_and_suffix['AVG'], tissue, pre_and_suffix['AREA']))
+                header.append('%s%s%s' % (pre_and_suffix['STD'], tissue, pre_and_suffix['AREA']))
+                header.append('%s%s%s' % (pre_and_suffix['AVG'], tissue, pre_and_suffix['PERC']))
+                header.append('%s%s%s' % (pre_and_suffix['STD'], tissue, pre_and_suffix['PERC']))
 
     else:
         for parameter in slice_parameters.keys():

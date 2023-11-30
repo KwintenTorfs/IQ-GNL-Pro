@@ -1,20 +1,22 @@
 import PySimpleGUI as sg
 
-import GUI.export
-from GUI.calculate import calculate_events, calculate_layout
+from GUI.calculate import calculate_events, calculate_layout, calculate_bindings
+from GUI.calculation import create_log
 from GUI.export import export_events, export_bindings, export_layout, update_export_tissues
 from GUI.folders import folders_bindings, folders_events, folders_layout, folders_parameters, list_methods, \
-    method_names, \
-    methods, switch_folder_method
+    method_names, methods
 from GUI.gnl import gnl_events, gnl_layout, gnl_bindings
-from GUI.exit_screen import sure_you_want_to_close, valid_save_files
+from GUI.exit_screen import valid_save_files
 from Constants.design_GUI import my_width, my_height, scaling, width, height, text, FrameFont, MenuFont, \
     accent
-from GUI.popups import popup_yes_no
+from GUI.popups import popup_close
 from GUI.save import save_layout, save_events, save_bindings
 from GUI.table import table_events, create_table_window
 from GUI.technique import technique_events, technique_layout, technique_bindings
 from configuration import GUI_ICON
+
+
+create_log()
 
 # global folders_parameters
 
@@ -37,11 +39,11 @@ frame_border = 0
 frame_color = 'white'
 frame_text_color = text
 
-tabs = ['Folders', 'Export', 'Measurement', 'GNL Tissue']
+tabs = ['Folders', 'Export', 'Measurement', 'GNL Tissue', 'Save']
 
 menu = [['&File', ['Open...', 'Close']],
-        ['&Settings', ['Folders', 'Export', 'Measurement', 'GNL Tissue', '&Method', [method_names]]],
-        ['&Table', ['Show data...']]
+        ['&Settings', ['Folders', 'Export', 'Measurement', 'GNL Tissue', 'Save', '&Method', [method_names]]],
+        # ['&Table', ['Show data...']]
         ]
 
 
@@ -65,13 +67,12 @@ tab_save = sg.Tab('Save', [[sg.Frame('', layout=save_layout(), border_width=fram
                                      font=FrameFont, expand_x=True, expand_y=True, title_color=frame_text_color)]],
                   key='Save')
 
-column_left = [[sg.Text('Welcome to GNOME', justification='left', font='Calibri 30 bold', expand_x=True)],
+column_left = [[sg.Text('Welcome to GNL Pro', justification='left', font='Calibri 30 bold', expand_x=True)],
                [sg.TabGroup([[tab_open_files, tab_gnl, tab_technique, tab_export, tab_save]],
                             expand_y=True, expand_x=True, font=MenuFont, title_color=text,
                             selected_title_color=accent, enable_events=True, key='TAB GROUP')],
                ]
 
-# column_right = [[sg.Button('Calculate', key='CALCULATE')]]
 
 layout = [[sg.Menu(menu, text_color=text, font=MenuFont, background_color='white')],
           [sg.Column(column_left, expand_y=True, expand_x=True),
@@ -82,7 +83,7 @@ layout = [[sg.Menu(menu, text_color=text, font=MenuFont, background_color='white
 # Window definition. Originally the GUI will not show the settings window, as it is only retrieved when the settings
 #   button is invoked
 
-window_main = sg.Window('IQ GNOME', layout, grab_anywhere=False, icon=GUI_ICON, finalize=True, resizable=True)
+window_main = sg.Window('IQ GNL Pro', layout, grab_anywhere=False, icon=GUI_ICON, finalize=True, resizable=True)
 window_main.Maximize()
 window_table = None
 technique_bindings(window_main)
@@ -90,6 +91,7 @@ gnl_bindings(window_main)
 folders_bindings(window_main)
 export_bindings(window_main)
 save_bindings(window_main)
+calculate_bindings(window_main)
 # Things related to the plot window
 
 plot_rows = []
@@ -106,7 +108,7 @@ while True:
     if event in [sg.WIN_CLOSED, 'Exit', '+ESCAPE+']:
         if window == window_main:
             window_main.DisableClose = True
-            close_program, save = sure_you_want_to_close()
+            close_program = popup_close()
             if close_program:
                 window.close()
 

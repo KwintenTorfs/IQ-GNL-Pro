@@ -23,12 +23,6 @@ my_width, my_height = (1536, 864)
 scaling = scaling_old * min(width / my_width, height / my_height)
 
 
-# GREENS
-# color = '#A7D971'
-# light = '#F4FFE8'
-# text_color = '#1F1A13'
-# darker = '#8EBA60'
-
 # ORANGES
 color = '#E9B453'
 light = '#FFF0D4'

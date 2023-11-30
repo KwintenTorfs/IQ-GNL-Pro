@@ -79,7 +79,7 @@ def get_calculable_slices(source_dir: str):
     nb_slices = len(slices)
     calculation_positions = {key: [] for key in scan_codes.keys()}
     if technique_parameters['GNL X SLICE']:
-        positions_average_x = select_number_of_positions(nb_slices, technique_parameters['NB'])
+        positions_average_x = select_number_of_positions(nb_slices, int(technique_parameters['NB']))
         scans_average_x = [slices[position] for position in positions_average_x]
     else:
         scans_average_x = []

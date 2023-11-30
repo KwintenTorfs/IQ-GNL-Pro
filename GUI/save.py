@@ -1,6 +1,7 @@
 import os.path
 
 import PySimpleGUI as sg
+import pandas as pd
 
 from Constants.Images.images_b64 import MAP, image_rescale, SAVEASWHITE
 from Constants.design_GUI import accent, TitleFont, text, TextFont, default_button, DefaultTextFont, default_text, \
@@ -14,8 +15,26 @@ def create_path(folder, file, file_type):
 
 valid_save_files = {'Excel Workbook (*.xlsx)': '.xlsx',
                     'CSV (comma delimited) (*.csv)': '.csv',
-                    'Excel Macro-Enabled Workbook (*.xlsm)': '.xlsm',
                     'Text (Tab Delimited) (*.txt)': '.txt'}
+
+df = pd.DataFrame(data=None)
+
+
+def save_excel(dataframe: pd.DataFrame, save_location: str):
+    dataframe.to_excel(save_location, index_label='Index')
+
+
+def save_csv(dataframe: pd.DataFrame, save_location: str):
+    dataframe.to_csv(save_location, sep=',', index_label='Index')
+
+
+def save_txt(dataframe: pd.DataFrame, save_location: str):
+    dataframe.to_csv(save_location, sep='\t', index_label='Index')
+
+
+operations_save = {'Excel Workbook (*.xlsx)': save_excel,
+                   'CSV (comma delimited) (*.csv)': save_csv,
+                   'Text (Tab Delimited) (*.txt)': save_txt}
 
 default_file = 'Book1'
 default_file_text = 'Enter file name here'
@@ -70,21 +89,22 @@ def save_layout():
                           [sg.Combo(list(valid_save_files.keys()), expand_x=True, text_color=text, font=TextFont,
                                     default_value=save_parameters['FILE TYPE'], key='FILE TYPE', enable_events=True,
                                     background_color='white')]]),
-               sg.Column([[sg.Text('', expand_y=True)],
-                          [sg.Frame('', layout=[[sg.Text(background_color='white', key='left',expand_x=True),
-                                                 sg.Button('', image_data=image_rescale(SAVEASWHITE, 17, 16),
-                                                           image_size=(20, 16), button_color='white', border_width=0,
-                                                           key='SAVE_ICON', size=(20, 1),
-                                                           enable_events=True),
-                                                 sg.Button('Save', button_color=(text, 'white'), font=MenuFont,
-                                                           border_width=0, key='SAVE', enable_events=True),
-                                                 sg.Text(background_color='white', key='right', expand_x=True)]],
-                                    background_color='white', border_width=0, key='FRAME2', expand_x=True,
-                                    size=(100, 30))]])]]
+               # sg.Column([[sg.Text('', expand_y=True)],
+               #            [sg.Frame('', layout=[[sg.Text(background_color='white', key='left', expand_x=True),
+               #                                   sg.Button('', image_data=image_rescale(SAVEASWHITE, 17, 16),
+               #                                             image_size=(20, 16), button_color='white', border_width=0,
+               #                                             key='SAVE_ICON', size=(20, 1),
+               #                                             enable_events=True),
+               #                                   sg.Button('Save', button_color=(text, 'white'), font=MenuFont,
+               #                                             border_width=0, key='SAVE', enable_events=True),
+               #                                   sg.Text(background_color='white', key='right', expand_x=True)]],
+               #                      background_color='white', border_width=0, key='FRAME2', expand_x=True,
+               #                      size=(100, 30))]])
+               ]]
     return layout
 
 
-def save_events(window, event, value):
+def save_events(window, event, _):
     global save_parameters
     if event != 'FILE':
         current_file = window['FILE'].get()
@@ -92,6 +112,7 @@ def save_events(window, event, value):
             window['FILE'].update(default_file_text, text_color=default_text)
             window['FILE'].widget.configure(font=DefaultTextFont)
             save_parameters['FILE'] = default_file_text
+            save_parameters['DEFAULT FILE'] = True
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
     elif event in ['FOLDER1+MOUSE OVER+', 'FOLDER2+MOUSE OVER+', 'FRAME+MOUSE OVER+']:
@@ -124,14 +145,12 @@ def save_events(window, event, value):
         window['FRAME2'].Widget.configure(highlightbackground=text, highlightcolor=text, highlightthickness=1)
         window['SAVE'].ParentRowFrame.config(background='white')
         window['SAVE_ICON'].ParentRowFrame.config(background='white')
-    elif event == 'SAVE+MOUSE OVER+':
-        window['SAVE'].update(button_color=default_button_hover)
-    elif event == 'SAVE+MOUSE AWAY+':
-        window['SAVE'].update(button_color=default_button)
+    # elif event == 'SAVE+MOUSE OVER+':
+    #     window['SAVE'].update(button_color=default_button_hover)
+    # elif event == 'SAVE+MOUSE AWAY+':
+    #     window['SAVE'].update(button_color=default_button)
     elif event == 'FILE':
-        previous_file = save_parameters['FILE']
         current_file = window['FILE'].get()
-        print(current_file)
         if default_file_text in current_file:
             current_file = current_file.split(default_file_text)[1]
         elif current_file == default_file_text[:-1]:
@@ -139,6 +158,7 @@ def save_events(window, event, value):
         window['FILE'].update(current_file, text_color=text)
         window['FILE'].widget.configure(font=TextFont)
         save_parameters['FILE'] = current_file
+        save_parameters['DEFAULT FILE'] = False
     elif event == 'FOLDER_IN':
         folder = window[event].get()
         save_parameters['FOLDER'] = folder
@@ -158,7 +178,6 @@ def save_events(window, event, value):
         extension = valid_save_files[save_parameters['FILE TYPE']]
         path = create_path(folder_name, filename, extension)
         save_parameters['PATH'] = path
-        print(save_parameters['PATH'])
     return
 
 
@@ -170,14 +189,15 @@ def save_bindings(window):
     window['FRAME'].bind('<Leave>', '+MOUSE AWAY+')
     window['FOLDER2'].bind('<Enter>', '+MOUSE OVER+')
     window['FOLDER2'].bind('<Leave>', '+MOUSE AWAY+')
-    window['SAVE'].bind('<Enter>', '+MOUSE OVER+')
-    window['SAVE'].bind('<Leave>', '+MOUSE AWAY+')
-    window['FRAME2'].bind('<Enter>', '+MOUSE OVER+')
-    window['FRAME2'].bind('<Leave>', '+MOUSE AWAY+')
-    window['SAVE_ICON'].bind('<Enter>', '+MOUSE OVER+')
-    window['SAVE_ICON'].bind('<Leave>', '+MOUSE AWAY+')
+    # window['SAVE'].bind('<Enter>', '+MOUSE OVER+')
+    # window['SAVE'].bind('<Leave>', '+MOUSE AWAY+')
+    # window['FRAME2'].bind('<Enter>', '+MOUSE OVER+')
+    # window['FRAME2'].bind('<Leave>', '+MOUSE AWAY+')
+    # window['SAVE_ICON'].bind('<Enter>', '+MOUSE OVER+')
+    # window['SAVE_ICON'].bind('<Leave>', '+MOUSE AWAY+')
+    # window['FRAME2'].Widget.configure(highlightbackground=text, highlightcolor=text, highlightthickness=1)
+
     window['FILE'].widget.config(selectbackground=light_accent, selectforeground=text)
-    window['FRAME2'].Widget.configure(highlightbackground=text, highlightcolor=text, highlightthickness=1)
     widget = window['FILE TYPE'].Widget
     widget.tk.eval('[ttk::combobox::PopdownWindow %s].f.l configure -foreground %s -background %s -'
                    'selectforeground %s -selectbackground %s' % (widget, text, background, text, light_accent))
