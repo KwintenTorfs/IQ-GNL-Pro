@@ -10,7 +10,7 @@ from GUI.table import table_header
 from GUI.technique import technique_parameters
 from GUI.calculation import process_list_of_image_slices, necessary_image_class_calculations, log, \
     process_list_of_folders
-from GUI.save import get_save_locations, save_parameters
+from GUI.save import get_save_locations, save_parameters, operations_save
 from GUI.popups import popup_yes_no
 import pandas as pd
 
@@ -87,7 +87,6 @@ def calculate_events(window, event, _):
             log(window, '')
             return
         scan_header = table_header(True)
-        print(scan_header)
         calculate_gnl, image_param = necessary_image_class_calculations(slices_header)
         dataframe_slice = pd.DataFrame(data=None, columns=slices_header)
         dataframe_scan = pd.DataFrame(data=None, columns=scan_header)

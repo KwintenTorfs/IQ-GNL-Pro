@@ -2,7 +2,7 @@ import datetime
 import os
 import numpy as np
 import pandas as pd
-from GUI.save import operations_save
+from GUI.save import operations_save, save_txt
 from GUI.table import pre_and_suffix
 from GUI.export import gnl_pre_text
 from GUI.technique import technique_parameters
@@ -10,6 +10,7 @@ from Calculations.calculation_functions import calculations, image_processing, i
 from Calculations.Global_Noise import construct_noise_map, global_noise_from_noise_map, standard_slice, \
     get_kernel_in_pixel
 from GUI.calculation_folders_to_files import get_calculable_slices
+from pytictoc import TicToc
 
 processing_steps = {'1 Basic dicom': False,
                     '2 Initialize image': False,
@@ -61,8 +62,12 @@ def necessary_image_class_calculations(heading: list[str]):
     return calculate_gnl, calculate_image_parameters
 
 
-def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
+
+def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
                                  calculate_image_parameters, calculate_gnl, window, save_type):
+    filename = os.path.basename(save_location)
+    save_folder = os.path.dirname(save_location)
+    temporary_save_location = str(os.path.join(save_folder, 'TEMP ' + filename).split('.')[0]) + '.txt'
     # Heading gives all parameters that need to be calculated
     heading = list(slice_dataframe.head())
     mask_size = float(technique_parameters['MASK'])
@@ -120,31 +125,46 @@ def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_range
         # Add information to dataframe and matrix
         slice_dataframe.loc[len(slice_dataframe)] = info.values()
         data.loc[len(data)] = info.values()
+        # This is used to have also a temporary file
         try:
-            # slice_dataframe.to_excel(save_location, sheet_name="Info per slice")
-            operations_save[save_type](slice_dataframe, save_location)
+            save_txt(slice_dataframe, temporary_save_location)
         except PermissionError:
-            log(window, 'PERMISSION ERROR -----> Save file PER SLICE is opened somewhere else')
-            break
+            log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
         log(window, string_image % (i + 1) + '/%i  ' % nb_images + image.filename + '  added to save location')
+    return data
+
+
+def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
+                                 calculate_image_parameters, calculate_gnl, window, save_type):
+    data = calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
+                                          calculate_image_parameters, calculate_gnl, window, save_type)
+    try:
+        operations_save[save_type](slice_dataframe, save_location)
+    except PermissionError:
+        log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
     return data
 
 
 def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, hounsfield_ranges, save_location_files,
                             save_location_scans, image_param, calculate_gnl, window, save_type):
+    t = TicToc()
+    filename = os.path.basename(save_location_scans)
+    save_folder = os.path.dirname(save_location_scans)
+    temporary_save_location = str(os.path.join(save_folder, 'TEMP ' + filename)).split('.')[0] + '.txt'
     header_scan = list(scan_dataframe.head())
     nb_folders = len(source_paths)
     string_folder = '%%0%id' % len(str(nb_folders))
+    t.tic()
     for i, folder in enumerate(source_paths):
         slices, measurements = get_calculable_slices(folder)
-        data = process_list_of_image_slices(image_slices=slices,
-                                            slice_dataframe=slice_dataframe,
-                                            hounsfield_ranges=hounsfield_ranges,
-                                            save_location=save_location_files,
-                                            calculate_image_parameters=image_param,
-                                            calculate_gnl=calculate_gnl,
-                                            window=window,
-                                            save_type=save_type)
+        data = calculate_list_of_image_slices(image_slices=slices,
+                                              slice_dataframe=slice_dataframe,
+                                              hounsfield_ranges=hounsfield_ranges,
+                                              save_location=save_location_files,
+                                              calculate_image_parameters=image_param,
+                                              calculate_gnl=calculate_gnl,
+                                              window=window,
+                                              save_type=save_type)
 
         for method in measurements.keys():
             nb_slices = len(measurements[method])
@@ -174,15 +194,25 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
                 else:
                     scan_info[parameter] = data[parameter][0]
             scan_dataframe.loc[len(scan_dataframe)] = scan_info.values()
+
+            # This is used to have also a temporary file
             try:
-                operations_save[save_type](scan_dataframe, save_location_scans)
-                # scan_dataframe.to_excel(save_location_scans)
+                save_txt(scan_dataframe, temporary_save_location)
             except PermissionError:
                 log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
 
         log(window, '')
         log(window, string_folder % (i + 1) + '/%i  ' % nb_folders + folder + '  PROCESSED')
         log(window, '')
+    t.toc()
+    try:
+        operations_save[save_type](slice_dataframe, save_location_files)
+    except PermissionError:
+        log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
+    try:
+        operations_save[save_type](scan_dataframe, save_location_scans)
+    except PermissionError:
+        log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
 
 
 def log(window, message, timestamp=True):

@@ -3,9 +3,9 @@ import os.path
 import PySimpleGUI as sg
 import pandas as pd
 
-from Constants.Images.images_b64 import MAP, image_rescale, SAVEASWHITE
-from Constants.design_GUI import accent, TitleFont, text, TextFont, default_button, DefaultTextFont, default_text, \
-    default_button_hover, light_accent, background, LargeFont, darker_grey, MenuFont
+from Constants.Images.images_b64 import MAP, image_rescale
+from Constants.design_GUI import accent, TitleFont, text, TextFont, DefaultTextFont, default_text, \
+    light_accent, background, LargeFont, darker_grey
 from configuration import RESULTS_FOLDER
 
 
@@ -145,10 +145,7 @@ def save_events(window, event, _):
         window['FRAME2'].Widget.configure(highlightbackground=text, highlightcolor=text, highlightthickness=1)
         window['SAVE'].ParentRowFrame.config(background='white')
         window['SAVE_ICON'].ParentRowFrame.config(background='white')
-    # elif event == 'SAVE+MOUSE OVER+':
-    #     window['SAVE'].update(button_color=default_button_hover)
-    # elif event == 'SAVE+MOUSE AWAY+':
-    #     window['SAVE'].update(button_color=default_button)
+
     elif event == 'FILE':
         current_file = window['FILE'].get()
         if default_file_text in current_file:
