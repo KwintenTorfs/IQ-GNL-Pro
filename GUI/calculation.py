@@ -12,6 +12,8 @@ from Calculations.Global_Noise import construct_noise_map, global_noise_from_noi
 from GUI.calculation_folders_to_files import get_calculable_slices
 from pytictoc import TicToc
 
+from configuration import resource_path
+
 processing_steps = {'1 Basic dicom': False,
                     '2 Initialize image': False,
                     '3 Masking': False,
@@ -62,9 +64,8 @@ def necessary_image_class_calculations(heading: list[str]):
     return calculate_gnl, calculate_image_parameters
 
 
-
 def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ranges, save_location,
-                                 calculate_image_parameters, calculate_gnl, window, save_type):
+                                   calculate_image_parameters, calculate_gnl, window, save_type):
     filename = os.path.basename(save_location)
     save_folder = os.path.dirname(save_location)
     temporary_save_location = str(os.path.join(save_folder, 'TEMP ' + filename).split('.')[0]) + '.txt'
@@ -232,9 +233,9 @@ def create_log():
 
 def add_to_active_log(log_string):
     if os.path.exists('current_log.txt'):
-        f = open('current_log.txt', 'a')
+        f = open(resource_path('current_log.txt'), 'a')
     else:
-        f = open('current_log.txt', 'w')
+        f = open(resource_path('current_log.txt'), 'w')
     f.write(log_string + '\n')
     f.close()
     return

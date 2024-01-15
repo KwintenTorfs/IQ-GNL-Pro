@@ -1,7 +1,5 @@
 import PySimpleGUI as sg
 
-program_name = r'Automatic GNL GUI'
-
 
 def get_scaling():
     # called before window created
@@ -40,7 +38,7 @@ color_theme = {'BACKGROUND': background_color,
                'PROGRESS': (various, color),
                'BORDER': 1,
                'SLIDER_DEPTH': 0,
-               'PROGRESS_DEPTH': 0,}
+               'PROGRESS_DEPTH': 0}
 
 
 background = color_theme.get('BACKGROUND')

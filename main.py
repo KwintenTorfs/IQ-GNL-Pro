@@ -1,3 +1,6 @@
+import os
+import sys
+
 import PySimpleGUI as sg
 
 from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL

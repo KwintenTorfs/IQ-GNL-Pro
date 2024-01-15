@@ -3,15 +3,15 @@ import numpy as np
 import pandas as pd
 
 from Support.dataframe_operations import change_column_to_data_type
-from configuration import ROOT_DIR
+from configuration import ROOT_DIR, resource_path
 
-constant_source = r'%s\Constants' % ROOT_DIR
+constant_source = r'%s\assets' % ROOT_DIR
 
 
 def get_hounsfield_dataframe(source, file):
     # Will return the hounsfield txt document 'file' and read it as a Dataframe
     try:
-        location = os.path.join(source, file)
+        location = resource_path(os.path.join(source, file))
         dataframe = pd.read_csv(location, sep=';', header=0)
     except (TypeError, FileNotFoundError, ValueError):
         return False
@@ -36,7 +36,10 @@ def get_hounsfield_dictionary(source=constant_source, file='Current Tissue HU.tx
     change_column_to_data_type(dataframe, 'Lower Limit', float)
     change_column_to_data_type(dataframe, 'Upper Limit', float)
     hounsfield_dict = {}
-    tissues = dataframe['Tissue']
+    try:
+        tissues = dataframe['Tissue']
+    except TypeError:
+        return
     for tissue in tissues:
         hounsfield_range = get_hounsfield_range(dataframe, tissue)
         if hounsfield_range:
