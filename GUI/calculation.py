@@ -12,7 +12,7 @@ from Calculations.Global_Noise import construct_noise_map, global_noise_from_noi
 from GUI.calculation_folders_to_files import get_calculable_slices
 from pytictoc import TicToc
 
-from configuration import resource_path
+from configuration import resource_path, ROOT_DIR
 
 processing_steps = {'1 Basic dicom': False,
                     '2 Initialize image': False,
@@ -233,9 +233,9 @@ def create_log():
 
 def add_to_active_log(log_string):
     if os.path.exists('current_log.txt'):
-        f = open(resource_path('current_log.txt'), 'a')
+        f = open('%scurrent_log.txt' % ROOT_DIR, 'a')
     else:
-        f = open(resource_path('current_log.txt'), 'w')
+        f = open('%scurrent_log.txt' % ROOT_DIR, 'w')
     f.write(log_string + '\n')
     f.close()
     return

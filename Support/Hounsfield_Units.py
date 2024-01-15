@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from Support.dataframe_operations import change_column_to_data_type
-from configuration import ROOT_DIR, resource_path
+from configuration import ROOT_DIR
 
 constant_source = r'%s\assets' % ROOT_DIR
 
@@ -11,7 +11,7 @@ constant_source = r'%s\assets' % ROOT_DIR
 def get_hounsfield_dataframe(source, file):
     # Will return the hounsfield txt document 'file' and read it as a Dataframe
     try:
-        location = resource_path(os.path.join(source, file))
+        location = os.path.join(source, file)
         dataframe = pd.read_csv(location, sep=';', header=0)
     except (TypeError, FileNotFoundError, ValueError):
         return False
