@@ -1,0 +1,9 @@
+PySimpleGUI~=4.60.5
+numpy~=1.26.0
+pandas~=2.1.1
+natsort~=8.4.0
+pytictoc~=1.5.3
+Pillow~=10.0.1
+pydicom~=2.4.4
+scikit-image~=0.21.0
+scipy~=1.11.3

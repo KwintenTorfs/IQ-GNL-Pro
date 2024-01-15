@@ -195,8 +195,6 @@ def set_all_lists(window):
     global folders_parameters
     for method in list_methods:
         files = "%s FILES" % method
-        print(folders_parameters[files][0])
-        print(folders_parameters[files][1])
         updated_files = natsorted(folders_parameters[files][1])
         window[files].update(values=updated_files)
 
