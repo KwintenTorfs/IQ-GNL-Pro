@@ -5,7 +5,7 @@ import PySimpleGUI as sg
 
 from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL
 from GUI.calculate import calculate_events, calculate_layout, calculate_bindings
-from GUI.calculation import create_log
+from GUI.calculation import create_log, log
 from GUI.export import export_events, export_bindings, export_layout, update_export_tissues
 from GUI.folders import folders_bindings, folders_events, folders_layout, folders_parameters, list_methods, \
     method_names, methods
@@ -17,13 +17,10 @@ from GUI.popups import popup_close
 from GUI.save import save_layout, save_events, save_bindings
 from GUI.table import table_events, create_table_window
 from GUI.technique import technique_events, technique_layout, technique_bindings
-from configuration import GUI_ICON
-
+from configuration import GUI_ICON, ROOT_DIR
 
 create_log()
-
 # global folders_parameters
-
 sg.set_options(scaling=scaling)
 
 

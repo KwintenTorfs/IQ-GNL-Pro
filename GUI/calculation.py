@@ -12,7 +12,7 @@ from Calculations.Global_Noise import construct_noise_map, global_noise_from_noi
 from GUI.calculation_folders_to_files import get_calculable_slices
 from pytictoc import TicToc
 
-from configuration import resource_path, ROOT_DIR
+from configuration import ROOT_DIR
 
 processing_steps = {'1 Basic dicom': False,
                     '2 Initialize image': False,
