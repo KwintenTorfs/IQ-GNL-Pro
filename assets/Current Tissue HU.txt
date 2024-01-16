@@ -1,0 +1,7 @@
+Tissue;Lower Limit;Upper Limit
+Soft Tissue;0.0;170.0
+Fat Tissue;-300.0;0.0
+Lung Tissue;-inf;-600.0
+Bone Tissue;300.0;inf
+Qaelum Soft Tissue;-300.0;300.0
+NEw soft;-inf;170.0
