@@ -39,7 +39,8 @@ study_parameters = {'kVp': True,
                     'Matrix Size': False,
                     'Study Comments': False,
                     'Study Description': False,
-                    'Path': True
+                    'Path': True,
+                    'PACSID': False
                     }
 
 slice_parameters = {'Slice Number': True,

@@ -114,7 +114,7 @@ def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ran
                 # Calculate all GNL value for a standard thickness slice
                 try:
                     info['%s%s%s%s' % (gnl_pre_text, tissue, pre_and_suffix['STD SLICE'], pre_and_suffix['HU'])] = \
-                        gnl_mode * np.sqrt(standard_slice[list(standard_slice.keys())[0]]) / np.sqrt(image.SliceThickness)
+                        gnl_mode * np.sqrt(image.SliceThickness) / np.sqrt(standard_slice[list(standard_slice.keys())[0]])
                 except TypeError:
                     log(window, 'TypeError  --->  GNL %s = None' % tissue)
                     info['%s%s%s%s' % (gnl_pre_text, tissue, pre_and_suffix['STD SLICE'], pre_and_suffix['HU'])] = None
