@@ -71,6 +71,22 @@ def get_save_locations():
     return save_location_files, save_location_scans
 
 
+def remove_temporary_saves():
+    """
+    Remove the temporary files where data is saved
+    :return:
+    """
+    for location in get_save_locations():
+        file_name = os.path.basename(location).split('.')[0]
+        file_dir = os.path.dirname(location)
+
+        temp_file_name = 'TEMP ' + file_name + '.txt'
+        temp_path = os.path.join(file_dir, temp_file_name)
+
+        if os.path.isfile(temp_path) and os.path.isfile(location) and temp_path[-4:] == '.txt':
+            os.remove(temp_path)
+
+
 def save_layout():
     global save_parameters
     layout = [[sg.Text('Save As', font=TitleFont, text_color=accent, justification='left')],

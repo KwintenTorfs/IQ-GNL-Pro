@@ -4,5 +4,4 @@ Fat Tissue;-300.0;0.0
 Lung Tissue;-inf;-600.0
 Bone Tissue;300.0;inf
 Qaelum Soft Tissue;-300.0;300.0
-Lung New;-inf;-500.0
-Ddgf;0.0;170.0
+Liver;0.0;50.0

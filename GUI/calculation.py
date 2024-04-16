@@ -2,7 +2,7 @@ import datetime
 import os
 import numpy as np
 import pandas as pd
-from GUI.save import operations_save, save_txt
+from GUI.save import operations_save, save_txt, remove_temporary_saves
 from GUI.table import pre_and_suffix
 from GUI.export import gnl_pre_text
 from GUI.technique import technique_parameters
@@ -104,13 +104,16 @@ def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ran
                 low, high = hounsfield_ranges[tissue]
                 # Lower limit of HU range for segmentation
                 info['%s%s%s' % (tissue, pre_and_suffix['LOW'], pre_and_suffix['HU'])] = low
+                # Area and body percentage of segmented tissue for GNL calculation
+                tissue_area, tissue_body_percentage = image.get_tissue_measurements([low, high])
+                info['%s%s' % (tissue, pre_and_suffix['AREA'])], info['%s%s' % (tissue, pre_and_suffix['PERC'])] = \
+                    (tissue_area, tissue_body_percentage)
                 # Higher limit of HU range for segmentation
                 info['%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU'])] = high
-                gnl_mode, gnl_median = global_noise_from_noise_map(image.body, noise_map, [low, high])
+                gnl_mode, _ = global_noise_from_noise_map(image.body, noise_map, [low, high])
+                if tissue_body_percentage < 0.05:
+                    gnl_mode = np.nan
                 info[parameter] = gnl_mode
-                # Area and body percentage of segmented tissue for GNL calculation
-                info['%s%s' % (tissue, pre_and_suffix['AREA'])], info['%s%s' % (tissue, pre_and_suffix['PERC'])] = \
-                    image.get_tissue_measurements([low, high])
                 # Calculate all GNL value for a standard thickness slice
                 try:
                     info['%s%s%s%s' % (gnl_pre_text, tissue, pre_and_suffix['STD SLICE'], pre_and_suffix['HU'])] = \
@@ -132,6 +135,7 @@ def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ran
         except PermissionError:
             log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
         log(window, string_image % (i + 1) + '/%i  ' % nb_images + image.filename + '  added to save location')
+    remove_temporary_saves()
     return data
 
 
@@ -214,6 +218,7 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
         operations_save[save_type](scan_dataframe, save_location_scans)
     except PermissionError:
         log(window, 'PERMISSION ERROR -----> Save file FOLDER is opened somewhere else')
+    remove_temporary_saves()
 
 
 def log(window, message, timestamp=True):

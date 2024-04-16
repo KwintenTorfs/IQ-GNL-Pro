@@ -120,6 +120,7 @@ def calculate_events(window, event, _):
                                    save_location_scans, image_param, calculate_gnl, window, save_type),
                              daemon=True).start()
 
+
     elif event in ['CALCULATE+MOUSE OVER+', 'CALCULATE ICON+MOUSE OVER+', 'CALCULATE FRAME+MOUSE OVER+',
                    'CALCULATE LEFT+MOUSE OVER+', 'CALCULATE RIGHT+MOUSE OVER+']:
         window['CALCULATE'].update(button_color=light_accent)
