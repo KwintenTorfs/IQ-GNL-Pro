@@ -53,7 +53,13 @@ slice_parameters = {'Slice Number': True,
                     'Truncation Fraction': False,
                     'File': True,
                     'Position in Stack': False,
-                    'Body Area (cm²)': False}
+                    'Body Area (cm²)': False,
+                    'Reconstruction Diameter (mm)': False,
+                    'Collection Diameter (mm)': False,
+                    'Offset Horizontal (mm)': False,
+                    'Offset Vertical (mm)': False,
+                    'Offset Radial (mm)': False
+                    }
 
 gnl_pre_text = 'GNL '
 
@@ -77,10 +83,15 @@ frame_text_color = text
 nb_gnl_per_column = 10
 original_tissues = get_original_tissues()
 max_gnl_boxes = len(original_tissues) + max_customisable_gnl
+max_study_boxes = len(study_parameters)
 
 GNL_keys = ['%s%s' % (gnl_pre_text, i) for i in range(max_gnl_boxes)]
 GNL_values = [None for i in range(max_gnl_boxes)]
 GNL_dictionary = dict(zip(GNL_keys, GNL_values))
+
+Study_Keys = ['%s' % i for i in range(max_study_boxes)]
+Study_values = [None for i in range(max_study_boxes)]
+Study_dictionary = dict(zip(Study_Keys, Study_values))
 
 
 def export_layout():
@@ -143,6 +154,34 @@ def export_layout():
                          sg.Button('Select All', key='ALL STUDY', font=TextFont, button_color=default_button,
                                    size=(10, 1))
                          ])
+
+    nb_columns = np.ceil(max_study_boxes / nb_gnl_per_column).astype(int)
+    size = (longest_word_study + 2, 1)
+    layout_columns = [[] for _ in range(nb_columns)]
+    i = 0
+    while i < max_study_boxes:
+        column = np.floor(i / nb_gnl_per_column).astype(int)
+        font = TextFont
+        key = '%s' % i
+        if i < len(study_parameters):
+            study = list(study_parameters.keys())[i]
+            Study_dictionary[key] = study
+            layout_columns[column].append([sg.Checkbox(text=study, default=study_parameters[study], size=size,
+                                                       text_color=text, font=font, background_color=frame_color,
+                                                       key=key, checkbox_color=box_color, enable_events=True)])
+        else:
+            Study_dictionary[key] = None
+            layout_columns[column].append([sg.Checkbox(text=key, default=False, size=size, text_color=text, font=font,
+                                                       background_color=frame_color, key=key, visible=False,
+                                                       disabled=True, checkbox_color=box_color, enable_events=True)])
+        i += 1
+
+    layout_study = [[sg.Column(column_layout, background_color=frame_color, expand_x=True, expand_y=True)
+                     for column_layout in layout_columns],
+                    [sg.Text('', expand_y=True, background_color=frame_color)],
+                    [sg.Push(background_color=frame_color),
+                     sg.Button('Reject All', key='REJECT STUDY', font=TextFont, button_color=default_button, size=(10, 1)),
+                     sg.Button('Select All', key='ALL STUDY', font=TextFont, button_color=default_button, size=(10, 1))]]
 
     longest_word_slice = max([len(i) for i in slice_parameters.keys()])
     size = (longest_word_slice + 2, 1)

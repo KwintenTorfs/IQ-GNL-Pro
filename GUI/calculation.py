@@ -18,7 +18,8 @@ processing_steps = {'1 Basic dicom': False,
                     '2 Initialize image': False,
                     '3 Masking': False,
                     '4 WED': False,
-                    '5 GNL': False}
+                    '5 Contour and Off Center': False,
+                    '6 GNL': False}
 
 
 def necessary_image_class_calculations(heading: list[str]):
@@ -57,7 +58,13 @@ def necessary_image_class_calculations(heading: list[str]):
                 calculate_image_parameters['2 Initialize image'] = True
                 calculate_image_parameters['3 Masking'] = True
                 calculate_image_parameters['1 Basic dicom'] = True
-    calculate_gnl = calculate_image_parameters.pop('5 GNL')
+            elif image_processing[param] == 'CONTOUR':
+                calculate_image_parameters['5 Contour and Off Center'] = True
+                calculate_image_parameters['4 WED'] = True
+                calculate_image_parameters['2 Initialize image'] = True
+                calculate_image_parameters['3 Masking'] = True
+                calculate_image_parameters['1 Basic dicom'] = True
+    calculate_gnl = calculate_image_parameters.pop('6 GNL')
     for operation in calculate_image_parameters.copy().keys():
         if not calculate_image_parameters[operation]:
             calculate_image_parameters.pop(operation)

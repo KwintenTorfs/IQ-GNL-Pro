@@ -67,7 +67,7 @@ def series_description(image):
 
 
 def data_collection_diameter(image):
-    return image.DataCollectionDiameter
+    return image.COLLECTION_DIAMETER
 
 
 def manufacturer(image):
@@ -139,7 +139,7 @@ def slice_location(image):
 
 
 def fov(image):
-    return image.ReconstructionDiameter
+    return image.RECONSTRUCTION_DIAMETER
 
 
 def file(image):
@@ -194,6 +194,26 @@ def folder(image):
     return image.folder
 
 
+def reconstruction_diameter(image):
+    return image.RECONSTRUCTION_DIAMETER
+
+
+def collection_diameter(image):
+    return image.COLLECTION_DIAMETER
+
+
+def offset_horizontal(image):
+    return image.OffsetHorizontal
+
+
+def offset_vertical(image):
+    return image.OffsetVertical
+
+
+def offset_radial(image):
+    return image.OffsetRadial
+
+
 calculations = {'Channels': channels,
                 'Manufacturer': manufacturer,
                 'Model': model,
@@ -235,7 +255,12 @@ calculations = {'Channels': channels,
                 'Revolution Time (s)': revolution_time,
                 'Study Comments': study_comments,
                 'Study Description': study_description,
-                'Body Area (cm²)': area
+                'Body Area (cm²)': area,
+                'Reconstruction Diameter (mm)': reconstruction_diameter,
+                'Collection Diameter (mm)': collection_diameter,
+                'Offset Horizontal (mm)': offset_horizontal,
+                'Offset Vertical (mm)': offset_vertical,
+                'Offset Radial (mm)': offset_radial
                 }
 
 
@@ -280,7 +305,12 @@ image_processing = {'Channels': 'BASIC',
                     'Revolution Time (s)': 'BASIC',
                     'Study Comments': 'BASIC',
                     'Study Description': 'BASIC',
-                    'Body Area (cm²)': 'MASK'
+                    'Body Area (cm²)': 'MASK',
+                    'Reconstruction Diameter (mm)': 'CONTOUR',
+                    'Collection Diameter (mm)': 'CONTOUR',
+                    'Offset Horizontal (mm)': 'CONTOUR',
+                    'Offset Vertical (mm)': 'CONTOUR',
+                    'Offset Radial (mm)': 'CONTOUR'
                     }
 
 
@@ -300,7 +330,12 @@ def set_wed(image):
     image.calculate_ssde()
 
 
+def set_contours_and_off_center(image):
+    image.calculate_contours_and_off_center()
+
+
 image_processing_operations = {'1 Basic dicom': basic_dicom,
                                '2 Initialize image': initialise_image,
                                '3 Masking': set_masking,
-                               '4 WED': set_wed}
+                               '4 WED': set_wed,
+                               '5 Contour and Off Center': set_contours_and_off_center}
