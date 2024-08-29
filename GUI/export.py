@@ -81,6 +81,7 @@ frame_color = various
 box_color = 'white'
 frame_text_color = text
 nb_gnl_per_column = 10
+study_pre_text = 'Study '
 original_tissues = get_original_tissues()
 max_gnl_boxes = len(original_tissues) + max_customisable_gnl
 max_study_boxes = len(study_parameters)
@@ -89,13 +90,13 @@ GNL_keys = ['%s%s' % (gnl_pre_text, i) for i in range(max_gnl_boxes)]
 GNL_values = [None for i in range(max_gnl_boxes)]
 GNL_dictionary = dict(zip(GNL_keys, GNL_values))
 
-Study_Keys = ['%s' % i for i in range(max_study_boxes)]
+Study_Keys = ['%s%s' % (study_pre_text, i) for i in range(max_study_boxes)]
 Study_values = [None for i in range(max_study_boxes)]
 Study_dictionary = dict(zip(Study_Keys, Study_values))
 
 
 def export_layout():
-    global tissue_parameters, GNL_dictionary
+    global tissue_parameters, GNL_dictionary, Study_dictionary, study_parameters
     current_db_tissues = get_available_tissues().keys()
     current_parameter_tissues = tissue_parameters.copy().keys()
     # Check for current tissues in DB and add new ones to tissue parameters
@@ -139,22 +140,22 @@ def export_layout():
                                      size=(10, 1))
                            ])
 
-    longest_word_study = max([len(i) for i in study_parameters.keys()])
-    size = (longest_word_study + 2, 1)
-    layout_study = [[sg.Checkbox(text=parameter, default=study_parameters[parameter], size=size, key=parameter,
-                                 text_color=text, font=TextFont, background_color=frame_color,
-                                 checkbox_color=box_color, enable_events=True)]
-                    for parameter in sorted(study_parameters.keys(), key=lambda v: (v.upper(), v[0].islower()))]
-    # noinspection PyTypeChecker
-    layout_study.append([sg.Text('', expand_y=True, background_color=frame_color)])
-    # noinspection PyTypeChecker
-    layout_study.append([sg.Push(background_color=frame_color),
-                         sg.Button('Reject All', key='REJECT STUDY', font=TextFont, button_color=default_button,
-                                   size=(10, 1)),
-                         sg.Button('Select All', key='ALL STUDY', font=TextFont, button_color=default_button,
-                                   size=(10, 1))
-                         ])
+    # size = (longest_word_study + 2, 1)
+    # layout_study = [[sg.Checkbox(text=parameter, default=study_parameters[parameter], size=size, key=parameter,
+    #                              text_color=text, font=TextFont, background_color=frame_color,
+    #                              checkbox_color=box_color, enable_events=True)]
+    #                 for parameter in sorted(study_parameters.keys(), key=lambda v: (v.upper(), v[0].islower()))]
+    # # noinspection PyTypeChecker
+    # layout_study.append([sg.Text('', expand_y=True, background_color=frame_color)])
+    # # noinspection PyTypeChecker
+    # layout_study.append([sg.Push(background_color=frame_color),
+    #                      sg.Button('Reject All', key='REJECT STUDY', font=TextFont, button_color=default_button,
+    #                                size=(10, 1)),
+    #                      sg.Button('Select All', key='ALL STUDY', font=TextFont, button_color=default_button,
+    #                                size=(10, 1))
+    #                      ])
 
+    longest_word_study = max([len(i) for i in study_parameters.keys()])
     nb_columns = np.ceil(max_study_boxes / nb_gnl_per_column).astype(int)
     size = (longest_word_study + 2, 1)
     layout_columns = [[] for _ in range(nb_columns)]
@@ -162,7 +163,7 @@ def export_layout():
     while i < max_study_boxes:
         column = np.floor(i / nb_gnl_per_column).astype(int)
         font = TextFont
-        key = '%s' % i
+        key = '%s%s' % (study_pre_text, i)
         if i < len(study_parameters):
             study = list(study_parameters.keys())[i]
             Study_dictionary[key] = study
@@ -298,13 +299,19 @@ def update_export_tissues(window):
 
 
 def set_all_parameters(window, parameters, end_value):
-    global GNL_dictionary, tissue_parameters
+    global GNL_dictionary, tissue_parameters, Study_dictionary, study_parameters
     if parameters == tissue_parameters:
         for parameter in GNL_dictionary.keys():
             tissue_param = GNL_dictionary[parameter]
             if tissue_param:
                 window[parameter].update(end_value)
                 parameters[GNL_dictionary[parameter]] = end_value
+    elif parameters == study_parameters:
+        for parameter in Study_dictionary.keys():
+            study_param = Study_dictionary[parameter]
+            if study_param:
+                window[parameter].update(end_value)
+                parameters[Study_dictionary[parameter]] = end_value
     else:
         for parameter in parameters.keys():
             window[parameter].update(end_value)
@@ -312,7 +319,7 @@ def set_all_parameters(window, parameters, end_value):
 
 
 def export_events(window, event, value):
-    global tissue_parameters
+    global tissue_parameters, study_parameters
     if event in [sg.WIN_CLOSED, '+ESCAPE+']:
         return
     elif event == 'ALL SLICE+MOUSE OVER+':
@@ -369,8 +376,9 @@ def export_events(window, event, value):
         slice_parameters[event] = value[event]
     elif event in scanner_parameters.keys():
         scanner_parameters[event] = value[event]
-    elif event in study_parameters.keys():
-        study_parameters[event] = value[event]
+    elif event in Study_dictionary.keys():
+        parameter = Study_dictionary[event]
+        study_parameters[parameter] = value[event]
     elif event in patient_parameters.keys():
         patient_parameters[event] = value[event]
     elif event in GNL_dictionary.keys():

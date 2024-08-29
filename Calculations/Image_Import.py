@@ -199,6 +199,9 @@ class Image:
         self.collection_diameter = None
         self.ctdi_phantom = None
         self.dicom = None
+        self.dimensions = None
+        self.dx = None
+        self.dy = None
         self.f = None
         self.first_pixel = None
         self.fov_contour = None
@@ -240,6 +243,7 @@ class Image:
                 self.set_array()
                 self.mask_and_body_segmentation()
                 self.calculate_ssde()
+                self.calculate_contours_and_off_center()
 
     def _transform_to_hu(self, array):
         return array * self.slope + self.intercept
@@ -419,6 +423,11 @@ class Image:
                 self.ctdi_phantom = 'Head'
             else:
                 self.ctdi_phantom = 'Body'
+            try:
+                self.dimensions = np.array(self.dicom.PixelSpacing)
+                self.dy, self.dx = np.multiply(self.raw_hu.shape, self.dimensions)
+            except (AttributeError, IndexError, TypeError):
+                pass
 
     def set_array(self):
         if self.valid:
@@ -471,16 +480,6 @@ class Image:
         except (AttributeError, TypeError):
             self.f, self.SSDE = np.nan, np.nan
 
-    def set_slice_number(self, new_slice_number):
-        self.SliceNumber = new_slice_number
-
-    def get_tissue_measurements(self, tissue_hu):
-        image = self.body
-        tissue_area = len(image[np.logical_and(tissue_hu[1] > image, image >= tissue_hu[0])]) * \
-                         (self.PixelSize / 10) ** 2  # in cm²
-        tissue_percentage = tissue_area / self.area
-        return tissue_area, tissue_percentage
-
     def calculate_contours_and_off_center(self):
         # PATIENT ORIENTATION AND LOCATION
         try:
@@ -522,11 +521,11 @@ class Image:
         self.reconstruction_diameter = np.max(self.array.shape)
         self.matrix_center = np.flip((np.array(self.array.shape) - 1) // 2)
         try:
-            self.MATRIX_CENTER = (self.matrix_center - self.first_pixel) * self.PixelSize + self.FIRST_PIXEL
+            self.MATRIX_CENTER = self.coordinate_to_real_space(self.matrix_center)
         except (TypeError, ValueError, AttributeError):
             self.MATRIX_CENTER = None
         try:
-            self.reconstruction_center = self.first_pixel + (self.RECONSTRUCTION_CENTER - self.FIRST_PIXEL) / self.PixelSize
+            self.reconstruction_center = self.real_to_coordinate_space(self.RECONSTRUCTION_CENTER)
         except (TypeError, ValueError, AttributeError):
             self.reconstruction_center = None
         try:
@@ -534,7 +533,7 @@ class Image:
         except (TypeError, ValueError, AttributeError):
             self.collection_diameter = None
         try:
-            self.collection_center = self.first_pixel + (self.COLLECTION_CENTER - self.FIRST_PIXEL) / self.PixelSize
+            self.collection_center = self.real_to_coordinate_space(self.COLLECTION_CENTER)
         except (TypeError, ValueError, AttributeError):
             self.collection_center = None
 
@@ -543,7 +542,7 @@ class Image:
         except (AttributeError, ValueError, TypeError):
             self.patient_center = None
         try:
-            self.PATIENT_CENTER = (self.patient_center - self.first_pixel) * self.PixelSize + self.FIRST_PIXEL
+            self.PATIENT_CENTER = self.coordinate_to_real_space(self.patient_center)
         except (TypeError, ValueError, AttributeError):
             self.PATIENT_CENTER = None
 
@@ -552,10 +551,20 @@ class Image:
             self.OffsetHorizontal, self.OffsetVertical = self.OFF_CENTER
             self.OffsetRadial = np.sqrt(np.sum(self.OFF_CENTER ** 2))
         except (AttributeError, ValueError, TypeError):
-            self.OFF_CENTER, self.OffsetHorizontal, self.OffsetVertical, self.OffsetRadial = None, None, None, None
+            self.OFF_CENTER, self.OffsetHorizontal, self.OffsetVertical, self.OffsetRadial = np.nan, np.nan, np.nan, np.nan
 
     def coordinate_to_real_space(self, coordinate):
         return np.matmul(self.matrix_coordinate_to_real, coordinate) + self.FIRST_PIXEL
 
     def real_to_coordinate_space(self, point):
         return np.matmul(self.matrix_real_to_coordinate, point - self.FIRST_PIXEL)
+
+    def set_slice_number(self, new_slice_number):
+        self.SliceNumber = new_slice_number
+
+    def get_tissue_measurements(self, tissue_hu):
+        image = self.body
+        tissue_area = len(image[np.logical_and(tissue_hu[1] > image, image >= tissue_hu[0])]) * \
+                         (self.PixelSize / 10) ** 2  # in cm²
+        tissue_percentage = tissue_area / self.area
+        return tissue_area, tissue_percentage
