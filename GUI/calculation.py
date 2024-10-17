@@ -118,7 +118,8 @@ def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ran
                 # Higher limit of HU range for segmentation
                 info['%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU'])] = high
                 gnl_mode, _ = global_noise_from_noise_map(image.body, noise_map, [low, high])
-                if tissue_body_percentage < 0.05:
+                # todo CHECK THIS
+                if tissue_body_percentage < 0.05 or gnl_mode is None:
                     gnl_mode = np.nan
                 info[parameter] = gnl_mode
                 # Calculate all GNL value for a standard thickness slice
@@ -189,11 +190,11 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
                     parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
                     try:
                         scan_info[pre_and_suffix['AVG'] + original_parameter] = np.nanmean(parameter_array)
-                    except RuntimeWarning:
+                    except (RuntimeWarning, TypeError):
                         scan_info[pre_and_suffix['AVG'] + original_parameter] = None
                     try:
                         scan_info[pre_and_suffix['STD'] + original_parameter] = np.nanstd(parameter_array)
-                    except RuntimeWarning:
+                    except (RuntimeWarning, TypeError):
                         scan_info[pre_and_suffix['STD'] + original_parameter] = None
                 elif pre_and_suffix['STD'] in parameter:
                     pass

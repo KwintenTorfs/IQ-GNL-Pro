@@ -27,6 +27,8 @@ def select_number_of_positions(list_len: int, no_slices: int):
         array:
             -An array of the positions in the list that make up the equidistant slices
     """
+    if list_len < no_slices:
+        return np.arange(0, list_len)
     try:
         division_length = list_len / no_slices
         overshoot_per_side = (division_length - 1) / 2
@@ -162,7 +164,6 @@ def get_calculable_slices(source_dir: str):
     calculation_positions['GNL ALL SLICE'] = [np.argwhere(val == positions_needed)[0][0] for val in positions_all]
     calculation_positions['GNL MID AX'] = [np.argwhere(val == positions_needed)[0][0] for val in position_mid_axial]
     return calculation_slices, calculation_positions
-
 
 
 # import os

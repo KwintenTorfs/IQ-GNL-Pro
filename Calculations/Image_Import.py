@@ -6,6 +6,7 @@ from pydicom.errors import InvalidDicomError
 from skimage.morphology import binary_erosion
 from scipy import ndimage
 
+
 # According to Ahmad (2021) -> take soft tissue upper to be 170, not 100 HU
 # Upper bound of lung tissue is taken as -600 =>
 #     https://books.google.be/books?id=IJwZHPrDQYUC&pg=PA379&redir_esc=y#v=onepage&q&f=false
@@ -142,11 +143,11 @@ def wed_truncation_correction(wed, truncation_percentage, scaling_parameter=anam
 # Coefficients to calculate the f conversion factor for the SSDE as seen in AAPM report in 2014
 ssde_coefficients = {'Body': [3.704369, 0.03671937], 'Head': [1.874799, 0.03871313]}
 
-
 class Image:
     minimum_value = -1800
 
     def __init__(self, directory, file, process=True, thresholds=None):
+
         self.AcquisitionType = None
         self.BodyPart = None
         self.COLLECTION_CENTER = None
@@ -158,6 +159,7 @@ class Image:
         self.FilterType = None,
         self.FIRST_PIXEL = None
         self.InStackPositionNumber = None
+        self.ImageComments = None
         self.MATRIX_CENTER = None
         self.OFF_CENTER = None
         self.OffsetHorizontal = None
@@ -197,7 +199,7 @@ class Image:
         self.channels = None
         self.collection_center = None
         self.collection_diameter = None
-        self.ctdi_phantom = None
+        self.ctdi_phantom = 'Body'
         self.dicom = None
         self.dimensions = None
         self.dx = None
@@ -414,6 +416,10 @@ class Image:
             except AttributeError:
                 self.StudyDescription = None
             try:
+                self.ImageComments = self.dicom.ImageComments
+            except AttributeError:
+                self.ImageComments = None
+            try:
                 ctdi_phantom_code = self.dicom.CTDIPhantomTypeCodeSequence[0].CodeValue
             except AttributeError:
                 ctdi_phantom_code = None
@@ -429,11 +435,15 @@ class Image:
             except (AttributeError, IndexError, TypeError):
                 pass
 
+
     def set_array(self):
         if self.valid:
             try:
                 self.array = self.dicom.pixel_array.astype(float)
-                if self.dicom.ImageComments != 'MASK IMAGE':
+                try:
+                    if self.ImageComments != 'MASK IMAGE':
+                        self.array = remove_truncation(self.array)
+                except AttributeError:
                     self.array = remove_truncation(self.array)
                 self.slope = self.dicom.RescaleSlope
                 self.intercept = self.dicom.RescaleIntercept
@@ -443,7 +453,7 @@ class Image:
                 self.valid = False
 
     def mask_and_body_segmentation(self):
-        if self.valid and self.dicom.ImageComments != 'MASK IMAGE':
+        if self.valid and self.ImageComments != 'MASK IMAGE':
             try:
                 self.mask, self.body = body_segmentation(self.raw_hu, self.thresholds)
             except (AttributeError, PermissionError):
@@ -452,7 +462,7 @@ class Image:
                 self.area = np.sum(self.mask) * (self.PixelSize / 10) ** 2  # Cross-sectional area of patient in cm²
             except (AttributeError, TypeError):
                 self.area = np.nan
-        elif self.valid and self.dicom.ImageComments == 'MASK IMAGE':
+        elif self.valid and self.ImageComments == 'MASK IMAGE':
             self.mask = self.raw_hu
 
     def calculate_ssde(self):
@@ -477,7 +487,7 @@ class Image:
         try:
             self.f = conversion_factor(self.WED, self.ctdi_phantom)  # ssde conversion factor in cm-1
             self.SSDE = self.f * self.CTDI_vol
-        except (AttributeError, TypeError):
+        except (AttributeError, TypeError, KeyError):
             self.f, self.SSDE = np.nan, np.nan
 
     def calculate_contours_and_off_center(self):
