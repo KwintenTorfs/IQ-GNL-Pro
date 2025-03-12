@@ -71,37 +71,68 @@ def extend_matrix_2d(matrix: np.ndarray, extend_px: int):
     return extended_image
 
 
+# def construct_noise_map(image, mask_size=samei_kernel):
+#     # This method has the same result of taking a convolution of the image with a 3 x 3 matrix and calculating STD in
+#     #     each masked region. However, the shift matrix approach is 4-5 times faster!
+#     # R is the radius of the mask
+#     r = int((mask_size - 1) // 2)
+#     image_shape = image.shape
+#     y_dim, x_dim = image_shape
+#
+#     # There will be the same number of shift matrices as the total number of pixels in one mask
+#     kernel_pixels = (2 * r + 1) ** 2
+#     shift_matrices = [[]] * kernel_pixels
+#
+#     # The shift matrix calculation is done in a matrix with size of the image + r at both sides
+#     extended_image = extend_matrix_2d(image, r)
+#
+#     # The first step towards calculating the SD, is calculating the average and shift matrices
+#     average = np.zeros(image_shape)
+#     for i in range(-r, r + 1):
+#         for j in range(-r, r + 1):
+#             shift_matrix_x = np.roll(extended_image, i, axis=1)
+#             shift_matrix = np.roll(shift_matrix_x, j, axis=0)[r: r + y_dim, r: r + x_dim]
+#
+#             average = average + shift_matrix / kernel_pixels
+#             index = (i + r) * (2 * r + 1) + (j + r)
+#             shift_matrices[index] = shift_matrix
+#
+#     # The next step is calculating the variance, and later SD
+#     variance = np.zeros(image_shape)
+#     for shift_matrix in shift_matrices:
+#         variance = variance + np.square(shift_matrix - average) / kernel_pixels
+#     noise_map = np.sqrt(variance)
+#     return noise_map
+
+
 def construct_noise_map(image, mask_size=samei_kernel):
     # This method has the same result of taking a convolution of the image with a 3 x 3 matrix and calculating STD in
     #     each masked region. However, the shift matrix approach is 4-5 times faster!
     # R is the radius of the mask
     r = int((mask_size - 1) // 2)
-    image_shape = image.shape
-    y_dim, x_dim = image_shape
+    y_dim, x_dim = image.shape
+
+    # The shift matrix calculation is done in a matrix with size of the image + r at both sides
+    # extended_image = extend_matrix_2d(hu_image, r)
+    extended_image = np.ones([y_dim + 2 * r, x_dim + 2 * r]) * np.nan
+
+    # Center ofr the extended image is the current image
+    extended_image[r:y_dim + r, r:x_dim + r] = image
 
     # There will be the same number of shift matrices as the total number of pixels in one mask
     kernel_pixels = (2 * r + 1) ** 2
-    shift_matrices = [[]] * kernel_pixels
-
-    # The shift matrix calculation is done in a matrix with size of the image + r at both sides
-    extended_image = extend_matrix_2d(image, r)
+    shift_matrices = np.zeros((kernel_pixels, y_dim, x_dim))
 
     # The first step towards calculating the SD, is calculating the average and shift matrices
-    average = np.zeros(image_shape)
     for i in range(-r, r + 1):
         for j in range(-r, r + 1):
-            shift_matrix_x = np.roll(extended_image, i, axis=1)
-            shift_matrix = np.roll(shift_matrix_x, j, axis=0)[r: r + y_dim, r: r + x_dim]
-
-            average = average + shift_matrix / kernel_pixels
+            # shift_matrix_x = np.roll(extended_image, i, axis=1)
+            # shift_matrix = np.roll(shift_matrix_x, j, axis=0)[r: r + y_dim, r: r + x_dim]
             index = (i + r) * (2 * r + 1) + (j + r)
-            shift_matrices[index] = shift_matrix
+            shift_matrices[index] = extended_image[r + i: r + i + y_dim, r + j: r + j + x_dim]
 
     # The next step is calculating the variance, and later SD
-    variance = np.zeros(image_shape)
-    for shift_matrix in shift_matrices:
-        variance = variance + np.square(shift_matrix - average) / kernel_pixels
-    noise_map = np.sqrt(variance)
+    noise_map = np.std(shift_matrices, axis=0)
     return noise_map
 
 

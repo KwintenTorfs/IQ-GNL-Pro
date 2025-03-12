@@ -4,3 +4,6 @@ Fat Tissue;-300.0;0.0
 Lung Tissue;-inf;-600.0
 Bone Tissue;300.0;inf
 Qaelum Soft Tissue;-300.0;300.0
+dsf;-inf;170.0
+Lung_Experiment;-inf;-700.0
+Lung four mm min RMS;-990.0;-560.0

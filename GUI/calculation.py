@@ -119,7 +119,11 @@ def calculate_list_of_image_slices(image_slices, slice_dataframe, hounsfield_ran
                 info['%s%s%s' % (tissue, pre_and_suffix['HIGH'], pre_and_suffix['HU'])] = high
                 gnl_mode, _ = global_noise_from_noise_map(image.body, noise_map, [low, high])
                 # todo CHECK THIS
-                if tissue_body_percentage < 0.05 or gnl_mode is None:
+                # if tissue_body_percentage < 0.05:
+                #     gnl_mode = np.nan
+                if tissue_area < 40:
+                    gnl_mode = np.nan
+                if gnl_mode is None:
                     gnl_mode = np.nan
                 info[parameter] = gnl_mode
                 # Calculate all GNL value for a standard thickness slice
