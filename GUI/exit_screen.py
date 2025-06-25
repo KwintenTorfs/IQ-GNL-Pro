@@ -1,4 +1,5 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 from Constants.design_GUI import text, various, accent, light_accent, TitleFont, SmallFont, \
     ButtonFont, TextFont, SpinSize, my_width, my_height, default_button, default_button_hover, accent_button, \

@@ -1,7 +1,8 @@
 import os
 import sys
 
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 
 from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL
 from GUI.calculate import calculate_events, calculate_layout, calculate_bindings

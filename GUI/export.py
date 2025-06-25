@@ -1,4 +1,5 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import numpy as np
 
 from Constants.design_GUI import text, various, accent, FrameFont, TitleFont, TextFont, default_button, \

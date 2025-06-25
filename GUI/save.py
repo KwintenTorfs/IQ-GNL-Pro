@@ -1,6 +1,7 @@
 import os.path
 
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import pandas as pd
 
 from Constants.Images.images_b64 import MAP, image_rescale

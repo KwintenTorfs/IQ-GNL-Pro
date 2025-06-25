@@ -1,7 +1,8 @@
 import os.path
 import threading
 
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 from Calculations.Image_Import import Image
 from Constants.Images.images_b64 import image_rescale, CALCULATOR
 from Constants.design_GUI import text, TextFont, MenuFont, light_accent, accent

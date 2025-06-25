@@ -1,4 +1,5 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import numpy as np
 
 from Constants.Images.images_b64 import image_rescale, INFINITY, MIN_INFINITY, TISSUEWHITE, TISSUEREMOVEWHITE

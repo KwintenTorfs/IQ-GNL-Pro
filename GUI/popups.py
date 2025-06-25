@@ -1,4 +1,5 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 from Constants.Images.images_b64 import WARNING, image_rescale, QUESTION
 from Constants.design_GUI import text, scaling, TextFont, MenuFont
 from configuration import GUI_ICON

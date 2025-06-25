@@ -1,7 +1,8 @@
 import os.path
 import threading
 
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import numpy as np
 from natsort import natsorted
 

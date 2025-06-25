@@ -1,4 +1,5 @@
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import numpy as np
 
 from Calculations.Global_Noise import samei_mask_size
