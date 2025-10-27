@@ -1,6 +1,5 @@
 import os.path
 
-# import PySimpleGUI as sg
 import FreeSimpleGUI as sg
 import pandas as pd
 
@@ -106,17 +105,6 @@ def save_layout():
                           [sg.Combo(list(valid_save_files.keys()), expand_x=True, text_color=text, font=TextFont,
                                     default_value=save_parameters['FILE TYPE'], key='FILE TYPE', enable_events=True,
                                     background_color='white')]]),
-               # sg.Column([[sg.Text('', expand_y=True)],
-               #            [sg.Frame('', layout=[[sg.Text(background_color='white', key='left', expand_x=True),
-               #                                   sg.Button('', image_data=image_rescale(SAVEASWHITE, 17, 16),
-               #                                             image_size=(20, 16), button_color='white', border_width=0,
-               #                                             key='SAVE_ICON', size=(20, 1),
-               #                                             enable_events=True),
-               #                                   sg.Button('Save', button_color=(text, 'white'), font=MenuFont,
-               #                                             border_width=0, key='SAVE', enable_events=True),
-               #                                   sg.Text(background_color='white', key='right', expand_x=True)]],
-               #                      background_color='white', border_width=0, key='FRAME2', expand_x=True,
-               #                      size=(100, 30))]])
                ]]
     return layout
 
@@ -203,13 +191,6 @@ def save_bindings(window):
     window['FRAME'].bind('<Leave>', '+MOUSE AWAY+')
     window['FOLDER2'].bind('<Enter>', '+MOUSE OVER+')
     window['FOLDER2'].bind('<Leave>', '+MOUSE AWAY+')
-    # window['SAVE'].bind('<Enter>', '+MOUSE OVER+')
-    # window['SAVE'].bind('<Leave>', '+MOUSE AWAY+')
-    # window['FRAME2'].bind('<Enter>', '+MOUSE OVER+')
-    # window['FRAME2'].bind('<Leave>', '+MOUSE AWAY+')
-    # window['SAVE_ICON'].bind('<Enter>', '+MOUSE OVER+')
-    # window['SAVE_ICON'].bind('<Leave>', '+MOUSE AWAY+')
-    # window['FRAME2'].Widget.configure(highlightbackground=text, highlightcolor=text, highlightthickness=1)
 
     window['FILE'].widget.config(selectbackground=light_accent, selectforeground=text)
     widget = window['FILE TYPE'].Widget

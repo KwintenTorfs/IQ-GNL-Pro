@@ -1,4 +1,3 @@
-# import PySimpleGUI as sg
 import FreeSimpleGUI as sg
 import numpy as np
 
@@ -176,8 +175,8 @@ def find_in_string(word, character):
 
 
 def check_valid_tissue_range(tissue, low, high):
-    return len(tissue) and type(tissue) == str \
-        and all([i in allowed_hu for i in low]) and all([i in allowed_hu for i in high])
+    return (len(tissue) and isinstance(tissue, str) and all([i in allowed_hu for i in low])
+            and all([i in allowed_hu for i in high]))
 
 
 def gnl_events(window, event, value):

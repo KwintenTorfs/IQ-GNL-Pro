@@ -6,12 +6,14 @@ from Support.dataframe_operations import change_column_to_data_type
 from configuration import ROOT_DIR
 
 constant_source = r'%s\assets' % ROOT_DIR
+ROOT_DIR = os.path.abspath(os.curdir)
+print(ROOT_DIR)
 
 
 def get_hounsfield_dataframe(source, file):
     # Will return the hounsfield txt document 'file' and read it as a Dataframe
     try:
-        location = os.path.join(source, file)
+        location = str(os.path.join(source, file))
         dataframe = pd.read_csv(location, sep=';', header=0)
     except (TypeError, FileNotFoundError, ValueError):
         return False
@@ -39,7 +41,7 @@ def get_hounsfield_dictionary(source=constant_source, file='Current Tissue HU.tx
     try:
         tissues = dataframe['Tissue']
     except TypeError:
-        return
+        return None
     for tissue in tissues:
         hounsfield_range = get_hounsfield_range(dataframe, tissue)
         if hounsfield_range:

@@ -143,6 +143,7 @@ def wed_truncation_correction(wed, truncation_percentage, scaling_parameter=anam
 # Coefficients to calculate the f conversion factor for the SSDE as seen in AAPM report in 2014
 ssde_coefficients = {'Body': [3.704369, 0.03671937], 'Head': [1.874799, 0.03871313]}
 
+
 class Image:
     minimum_value = -1800
 
@@ -434,7 +435,6 @@ class Image:
                 self.dy, self.dx = np.multiply(self.raw_hu.shape, self.dimensions)
             except (AttributeError, IndexError, TypeError):
                 pass
-
 
     def set_array(self):
         if self.valid:

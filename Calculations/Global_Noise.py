@@ -139,8 +139,9 @@ def construct_noise_map(image, mask_size=samei_kernel):
 def histogram_mode(values, bin_width=samei_bin_width):
     # This function takes an array of positive values (STD measurements), bins them with a certain bin width, constructs
     #       a histogram and returns the mode of that histogram
-    noise_bins = np.arange(0, max(values) + bin_width, bin_width)
+    noise_bins = np.arange(- bin_width / 2, max(values) + bin_width, bin_width)
     histogram, noise_bins = np.histogram(values, bins=noise_bins)
+    noise_bins += bin_width / 2
     mode_index = histogram.argmax()
     noise_mode = noise_bins[mode_index]
     noise_median = np.median(values)

@@ -1,7 +1,6 @@
 import os.path
 import threading
 
-# import PySimpleGUI as sg
 import FreeSimpleGUI as sg
 from Calculations.Image_Import import Image
 from Constants.Images.images_b64 import image_rescale, CALCULATOR
@@ -11,7 +10,7 @@ from GUI.table import table_header
 from GUI.technique import technique_parameters
 from GUI.calculation import process_list_of_image_slices, necessary_image_class_calculations, log, \
     process_list_of_folders
-from GUI.save import get_save_locations, save_parameters, operations_save
+from GUI.save import get_save_locations, save_parameters
 from GUI.popups import popup_yes_no
 import pandas as pd
 

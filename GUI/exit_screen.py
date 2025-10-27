@@ -1,4 +1,3 @@
-# import PySimpleGUI as sg
 import FreeSimpleGUI as sg
 
 from Constants.design_GUI import text, various, accent, light_accent, TitleFont, SmallFont, \
