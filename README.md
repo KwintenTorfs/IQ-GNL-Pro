@@ -1,6 +1,9 @@
+>[!IMPORTANT] 
+> The contents of this tool remain under construction, so changes will keep getting committed
+
 # IQ GNL Pro <img src="https://github.com/KwintenTorfs/GNL_GUI/blob/master/assets/LOGO%20Black.png" width=5% height=5% align='right'>
 
-This program allows to automatically assess image quality in phantom and patient CT images by calculating global noise level (GNL). Besides GNL, it is possible to use this tool to retrieve information available in the CT image .dicom header, or other calculated properties, e.g. _water-equivalent diameter_ **WED**, amount of image truncation, patient positioning offset,... \
+This program allows to automatically assess image quality in phantom and patient CT images by calculating global noise level (GNL). Besides GNL, it is possible to use this tool to retrieve information available in the CT image .dicom header, or other calculated properties, e.g. _water-equivalent diameter_ WED, amount of image truncation, patient positioning offset,... \
 The tool was developed by the _Medical Physics and Quality Assessment_ group of the KU Leuven. Funding was procured through a FWO Fellowship by _Kom op Tegen Kanker_.
 
 
@@ -74,3 +77,4 @@ Necessary packages can be installed through the _requirements.txt_ folder
 
 >[!WARNING]
 >This public repository is still in it's early development. Problems with implementation into your own work setting may occur.
+
