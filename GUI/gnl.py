@@ -274,7 +274,7 @@ def gnl_events(window, event, value):
     # Following Event will remove a custom tissue to the database
     elif event in ['REMOVE TISSUE', 'TABLE+DELETE+', 'TISSUE REMOVE ICON']:
         selected_rows = list(value['TABLE'])
-        table = window['TABLE'].get()
+        table = window['TABLE'].Values
         for row in selected_rows:
             tissue = table[row][0]
             drop_hounsfield_tissue(tissue)

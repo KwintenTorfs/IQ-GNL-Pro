@@ -1,2 +1,0 @@
-Index	Manufacturer
-0	Siemens
