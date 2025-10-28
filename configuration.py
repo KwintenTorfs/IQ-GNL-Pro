@@ -1,6 +1,7 @@
 import os
 import sys
 
+#IF THIS APPEARS, it worked
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
 def resource_path(relative_path):
