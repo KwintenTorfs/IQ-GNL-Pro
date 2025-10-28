@@ -1,3 +1,5 @@
+import os
+
 import FreeSimpleGUI as sg
 
 from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL
@@ -14,7 +16,7 @@ from GUI.popups import popup_close
 from GUI.save import save_layout, save_events, save_bindings
 from GUI.table import table_events, create_table_window
 from GUI.technique import technique_events, technique_layout, technique_bindings
-from configuration import GUI_ICON
+from configuration import GUI_ICON, RESULTS_FOLDER
 
 create_log()
 # global folders_parameters
@@ -27,6 +29,9 @@ sg.theme('GNL GUI Theme')
 # Current Values
 save_type = valid_save_files[0]
 
+# Check ResultsFolder
+if ~os.path.exists(RESULTS_FOLDER):
+    os.makedirs(RESULTS_FOLDER)
 
 save_frame_size = (int(1 * my_width), int(0.08 * my_height))
 frame_calculation = (int(0.4 * my_width), int(0.5 * my_height))

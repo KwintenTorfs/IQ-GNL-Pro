@@ -1,7 +1,6 @@
 import os
 import sys
 
-#IF THIS APPEARS, it worked
 
 # https://stackoverflow.com/questions/31836104/pyinstaller-and-onefile-how-to-include-an-image-in-the-exe-file
 def resource_path(relative_path):
@@ -12,10 +11,6 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-
-# project_name = 'GNL_GUI'
-#
-# ROOT_DIR = resource_path(os.path.join(os.getcwd().split(project_name)[0], project_name))
 
 ROOT_DIR = os.getcwd()
 
