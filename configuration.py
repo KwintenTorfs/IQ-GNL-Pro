@@ -12,9 +12,11 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-project_name = 'GNL_GUI'
+# project_name = 'GNL_GUI'
+#
+# ROOT_DIR = resource_path(os.path.join(os.getcwd().split(project_name)[0], project_name))
 
-ROOT_DIR = resource_path(os.path.join(os.getcwd().split(project_name)[0], project_name))
+ROOT_DIR = os.getcwd()
 
 GUI_ICON = resource_path(r'%s\assets\GUI Icon Orange.ico' % ROOT_DIR)
 
