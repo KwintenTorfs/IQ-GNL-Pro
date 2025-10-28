@@ -1,7 +1,7 @@
 >[!IMPORTANT] 
 > The contents of this tool remain under construction, so changes will keep getting committed
 
-This repository contains the code to calculate global noise level and was used in the manuscript: _Insights, robustness and practical considerations of global noise level measurement in chest CT_ (doi: )
+This repository contains the code to calculate global noise level and was used in the manuscript: _Insights, robustness and practical considerations of global noise level measurement in chest CT_ (doi: ). When using this toolbox in your work, please refer to this paper.
 
 # IQ GNL Pro <img src="https://github.com/KwintenTorfs/GNL_GUI/blob/master/assets/LOGO%20Black.png" width=5% height=5% align='right'>
 
@@ -76,5 +76,6 @@ Necessary packages can be installed through the _requirements.txt_ folder
 
 >[!WARNING]
 >This public repository is still in it's early development. Problems with implementation into your own work setting may occur.
+
 
 
