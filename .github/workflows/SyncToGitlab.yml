@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Pull changes from GitLab
       run: |
-        git remote add gitlab $GITLAB_REPO_URL
+        git remote add gitlab ${{secrets.GITLAB_URL}}
         git fetch gitlab
         git merge gitlab/master --allow-unrelated-histories
     - name: Sync to GitLab
