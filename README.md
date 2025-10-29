@@ -1,11 +1,14 @@
 >[!IMPORTANT] 
 > The contents of this tool remain under construction, so changes will keep getting committed
 
+This repository contains the code to calculate global noise level and was used in the manuscript: _Insights, robustness and practical considerations of global noise level measurement in chest CT_ (doi: ). When using this toolbox in your work, please refer to this paper.
+
 # IQ GNL Pro <img src="https://github.com/KwintenTorfs/GNL_GUI/blob/master/assets/LOGO%20Black.png" width=5% height=5% align='right'>
 
-This program allows to automatically assess image quality in phantom and patient CT images by calculating global noise level (GNL). Besides GNL, it is possible to use this tool to retrieve information available in the CT image .dicom header, or other calculated properties, e.g. _water-equivalent diameter_ WED, amount of image truncation, patient positioning offset,... \
-The tool was developed by the _Medical Physics and Quality Assessment_ group of the KU Leuven. Funding was procured through a FWO Fellowship by _Kom op Tegen Kanker_.
+This toolbox allows to automatically assess image quality in phantom and patient CT images by calculating global noise level (GNL). Besides GNL, it is possible to use this tool to retrieve information available in the CT image .dicom header, or other calculated properties, e.g. _water-equivalent diameter_ WED, amount of image truncation, patient positioning offset,... \
+The tool was developed by the _Medical Physics and Quality Assessment_ group of the KU Leuven. Funding was procured through a FWO Fellowship by _Kom op Tegen Kanker_ (reference number: G0B1922N).
 
+It can be accessed publicly from [Github](https://github.com/KwintenTorfs/IQ-GNL-Pro) or [Gitlab](https://gitlab.kuleuven.be/medphysqa/deploy/iq-gnl-pro)
 
 Development: [Kwinten Torfs](https://www.kuleuven.be/wieiswie/nl/person/00148621)
 
@@ -66,15 +69,13 @@ The user can also determine in which slices of a folder to measure
 ### Calculate
 After initialising the settings, measurements are started using this button
 
-## Code
-A detailed description of the code will follow
 
 ### Installed packages
 Necessary packages can be installed through the _requirements.txt_ folder
 
->[!IMPORTANT]
->The requirements folder may be incomplete. Please try seeing which packages are necessary before using the tool. Hidden ones may be openpyxl (necessary for pandas excel export)
 
 >[!WARNING]
 >This public repository is still in it's early development. Problems with implementation into your own work setting may occur.
+
+
 
