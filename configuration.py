@@ -14,6 +14,6 @@ def resource_path(relative_path):
 
 ROOT_DIR = os.getcwd()
 
-GUI_ICON = resource_path(r'%s\assets\GUI Icon Orange.ico' % ROOT_DIR)
+GUI_ICON = resource_path(r'%s\assets\PIC.ico' % ROOT_DIR)
 
 RESULTS_FOLDER = r'%s\Results' % ROOT_DIR

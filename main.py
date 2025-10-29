@@ -30,7 +30,7 @@ sg.theme('GNL GUI Theme')
 save_type = valid_save_files[0]
 
 # Check ResultsFolder
-if ~os.path.exists(RESULTS_FOLDER):
+if not os.path.exists(RESULTS_FOLDER):
     os.makedirs(RESULTS_FOLDER)
 
 save_frame_size = (int(1 * my_width), int(0.08 * my_height))
