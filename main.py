@@ -2,7 +2,7 @@ import os
 
 import FreeSimpleGUI as sg
 
-from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL
+from Constants.Images.images_b64 import UZL, image_rescale, KOTK, KUL, PIC
 from GUI.calculate import calculate_events, calculate_layout, calculate_bindings
 from GUI.calculation import create_log
 from GUI.export import export_events, export_bindings, export_layout, update_export_tissues
@@ -70,7 +70,8 @@ tab_save = sg.Tab('Save', [[sg.Frame('', layout=save_layout(), border_width=fram
                                      font=FrameFont, expand_x=True, expand_y=True, title_color=frame_text_color)]],
                   key='Save')
 
-column_left = [[sg.Text('Welcome to GNL Pro', justification='left', font='Calibri 30 bold', expand_x=True),
+column_left = [[sg.Text('Welcome to IQ GNL Pro', justification='left', font='Calibri 30 bold', expand_x=True),
+                sg.Image(data=image_rescale(PIC, 90, 90)),
                 sg.Image(data=image_rescale(KOTK, 82, 50)),
                 sg.Image(data=image_rescale(UZL, 155, 50)),
                 sg.Image(data=image_rescale(KUL, 140, 50))

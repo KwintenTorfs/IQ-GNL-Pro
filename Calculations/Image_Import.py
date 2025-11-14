@@ -4,6 +4,7 @@ import pydicom
 from pydicom.multival import MultiValue
 from pydicom.errors import InvalidDicomError
 from skimage.morphology import binary_erosion
+from skimage.measure import perimeter_crofton
 from scipy import ndimage
 
 
@@ -197,6 +198,7 @@ class Image:
         self.average_hu = None
         self.body = None
         self.body_contour = None
+        self.body_perimeter = None
         self.channels = None
         self.collection_center = None
         self.collection_diameter = None
@@ -479,6 +481,11 @@ class Image:
             self.truncated_fraction, self.body_contour, self.fov_contour = fraction_truncation(self.raw_hu, self.mask)
         except (AttributeError, TypeError):
             self.truncated_fraction, self.body_contour, self.fov_contour = np.nan, np.nan, np.nan
+        try:
+            self.body_perimeter = perimeter_crofton(self.mask, 4) * self.PixelSize
+        except (AttributeError, TypeError):
+            self.body_perimeter = np.nan
+
         try:
             self.WED, self.WED_correction_factor = \
                 wed_truncation_correction(self.WED_uncorrected, self.truncated_fraction)

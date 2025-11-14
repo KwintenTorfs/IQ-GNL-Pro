@@ -214,6 +214,10 @@ def offset_radial(image):
     return image.OffsetRadial
 
 
+def body_perimeter(image):
+    return image.body_perimeter
+
+
 calculations = {'Channels': channels,
                 'Manufacturer': manufacturer,
                 'Model': model,
@@ -260,7 +264,8 @@ calculations = {'Channels': channels,
                 'Collection Diameter (mm)': collection_diameter,
                 'Offset Horizontal (mm)': offset_horizontal,
                 'Offset Vertical (mm)': offset_vertical,
-                'Offset Radial (mm)': offset_radial
+                'Offset Radial (mm)': offset_radial,
+                'Body Perimeter (mm)': body_perimeter
                 }
 
 
@@ -310,7 +315,8 @@ image_processing = {'Channels': 'BASIC',
                     'Collection Diameter (mm)': 'CONTOUR',
                     'Offset Horizontal (mm)': 'CONTOUR',
                     'Offset Vertical (mm)': 'CONTOUR',
-                    'Offset Radial (mm)': 'CONTOUR'
+                    'Offset Radial (mm)': 'CONTOUR',
+                    'Body Perimeter (mm)': 'CONTOUR'
                     }
 
 
