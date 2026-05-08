@@ -2,11 +2,10 @@ import os
 import numpy as np
 from natsort import natsorted
 from Calculations.Image_Import import Image
-from GUI.technique import technique_parameters
-
+from GUI.technique import technique_parameters, predefined_nb_slices
 
 scan_codes = {'GNL MID AX': 'M',
-              'GNL 10 SLICE': 'T',
+              'GNL PREDEF SLICE': 'T',
               'GNL X SLICE': 'X',
               'GNL ALL SLICE': 'A'}
 
@@ -78,7 +77,7 @@ def get_calculable_slices(source_dir: str):
     """
     nb_slices = len(os.listdir(source_dir))
 
-    positions_all, positions_average_x, positions_average_10, position_mid_axial = [], [], [], []
+    positions_all, positions_average_x, positions_average_predef, position_mid_axial = [], [], [], []
     if technique_parameters['GNL X SLICE']:
         take_nb = np.min([nb_slices, int(technique_parameters['NB'])])
         positions_average_x = select_number_of_positions(nb_slices, take_nb)
@@ -86,18 +85,18 @@ def get_calculable_slices(source_dir: str):
     if technique_parameters['GNL ALL SLICE']:
         positions_all = np.arange(nb_slices)
 
-    if technique_parameters['GNL 10 SLICE']:
-        positions_average_10 = select_number_of_positions(nb_slices, 10)
+    if technique_parameters['GNL PREDEF SLICE']:
+        positions_average_predef = select_number_of_positions(nb_slices, predefined_nb_slices)
 
     if technique_parameters['GNL MID AX'] and nb_slices > 0:
         position_mid_axial = [nb_slices // 2]
 
     positions_needed = np.array(sorted(
-        list(set(positions_all) | set(positions_average_x) | set(positions_average_10) | set(position_mid_axial))))
+        list(set(positions_all) | set(positions_average_x) | set(positions_average_predef) | set(position_mid_axial))))
     files = natsorted(os.listdir(source_dir))
     calculation_slices = [Image(source_dir, files[file], process=False) for file in positions_needed]
     calculation_positions = dict()
-    calculation_positions['GNL 10 SLICE'] = [np.argwhere(val == positions_needed)[0][0] for val in positions_average_10]
+    calculation_positions['GNL PREDEF SLICE'] = [np.argwhere(val == positions_needed)[0][0] for val in positions_average_predef]
     calculation_positions['GNL X SLICE'] = [np.argwhere(val == positions_needed)[0][0] for val in positions_average_x]
     calculation_positions['GNL ALL SLICE'] = [np.argwhere(val == positions_needed)[0][0] for val in positions_all]
     calculation_positions['GNL MID AX'] = [np.argwhere(val == positions_needed)[0][0] for val in position_mid_axial]

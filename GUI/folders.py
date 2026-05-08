@@ -364,7 +364,7 @@ def switch_folder_method(window, event):
                 window['PER SCAN'].update(False, disabled=True)
                 window['GNL ALL SLICE'].update(True, disabled=True)
                 window['GNL MID AX'].update(False, disabled=True)
-                window['GNL 10 SLICE'].update(False, disabled=True)
+                window['GNL PREDEF SLICE'].update(False, disabled=True)
                 window['GNL X SLICE'].update(False, disabled=True)
                 window['NB'].update(disabled=True)
                 window['text'].update(text_color='grey')

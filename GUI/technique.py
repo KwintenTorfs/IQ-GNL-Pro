@@ -1,24 +1,24 @@
 import FreeSimpleGUI as sg
 import numpy as np
 
-from Calculations.Global_Noise import samei_mask_size
+from Calculations.Global_Noise import kwinten_mask_size
 from Constants.design_GUI import text, various, accent, light_accent, TitleFont, SmallFont, TextFont, window_size, \
     default_button, default_button_hover
 from GUI.gnl import find_in_string
 from configuration import GUI_ICON
 
 settings_window_size = (int(0.45 * window_size[0]), int(0.4 * window_size[1]))
-default_nb_slices = 5
+default_nb_slices = 20
 allowed_slices = '0123456789'
 max_slices_digits = 4
-default_mask_size = samei_mask_size
-kernels = np.arange(1, 33, 2)
+default_mask_size = kwinten_mask_size
 allowed_mask_size = '0123456789.'
+predefined_nb_slices = 20
 max_mask_digits = 5
 
 technique_parameters = {'GNL MID AX': False,
                         'GNL ALL SLICE': False,
-                        'GNL 10 SLICE': True,
+                        'GNL PREDEF SLICE': True,
                         'GNL X SLICE': False,
                         'NB': default_nb_slices,
                         'PER SCAN': True,
@@ -37,8 +37,8 @@ def technique_layout():
                                  enable_events=True)],
                     [sg.Checkbox('All slices (+avg)', key='GNL ALL SLICE', text_color=text, enable_events=True,
                                  font=TextFont, default=technique_parameters['GNL ALL SLICE'], disabled=disabled_scan)],
-                    [sg.Checkbox('10 equidistant slices (+avg)', key='GNL 10 SLICE', text_color=text, font=TextFont,
-                                 default=technique_parameters['GNL 10 SLICE'], disabled=disabled_scan,
+                    [sg.Checkbox('%i equidistant slices (+avg)' % predefined_nb_slices, key='GNL PREDEF SLICE', text_color=text, font=TextFont,
+                                 default=technique_parameters['GNL PREDEF SLICE'], disabled=disabled_scan,
                                  enable_events=True)],
                     [sg.Checkbox('', key='GNL X SLICE', text_color=text, font=TextFont, enable_events=True,
                                  default=technique_parameters['GNL X SLICE'], disabled=disabled_scan),
@@ -93,14 +93,14 @@ def technique_events(window, event, value, window_main):
     elif event == 'PER SLICE':
         window['GNL ALL SLICE'].update(True, disabled=True)
         window['GNL MID AX'].update(False, disabled=True)
-        window['GNL 10 SLICE'].update(False, disabled=True)
+        window['GNL PREDEF SLICE'].update(False, disabled=True)
         window['GNL X SLICE'].update(False, disabled=True)
         window['NB'].update(disabled=True)
         window['text'].update(text_color='grey')
     elif event == 'PER SCAN':
         window['GNL ALL SLICE'].update(technique_parameters['GNL ALL SLICE'], disabled=False)
         window['GNL MID AX'].update(technique_parameters['GNL MID AX'], disabled=False)
-        window['GNL 10 SLICE'].update(technique_parameters['GNL 10 SLICE'], disabled=False)
+        window['GNL PREDEF SLICE'].update(technique_parameters['GNL PREDEF SLICE'], disabled=False)
         window['GNL X SLICE'].update(technique_parameters['GNL X SLICE'], disabled=False)
         window['NB'].update(technique_parameters['NB'], disabled=False)
         window['text'].update(text_color=text)
