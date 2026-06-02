@@ -20,6 +20,7 @@ patient_parameters = {'Patient Sex': False,
                       'Patient Age (y)': False,
                       'Body Part Examined': False,
                       'Patient ID': False,
+                      'Patient Position': False,
                       }
 
 study_parameters = {'kVp': True,
@@ -39,6 +40,7 @@ study_parameters = {'kVp': True,
                     'Matrix Size': False,
                     'Study Comments': False,
                     'Study Description': False,
+                    'Focal Spot (mm)': False,
                     'Path': True,
                     'PACSID': False
                     }

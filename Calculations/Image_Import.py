@@ -141,6 +141,15 @@ def wed_truncation_correction(wed, truncation_percentage, scaling_parameter=anam
     return corrected_wed, truncation_correction
 
 
+def floats_to_strings(value):
+    if isinstance(value, (int, float)):
+        return [str(value), str(value)]
+    elif isinstance(value, (list, MultiValue)):
+        return [str(x) for x in value]
+    else:
+        raise TypeError("Input must be a float or a list of floats")
+
+
 # Coefficients to calculate the f conversion factor for the SSDE as seen in AAPM report in 2014
 ssde_coefficients = {'Body': [3.704369, 0.03671937], 'Head': [1.874799, 0.03871313]}
 
@@ -150,6 +159,8 @@ class Image:
 
     def __init__(self, directory, file, process=True, thresholds=None):
 
+        self.FocalSpot = None
+        self.PatientPosition = None
         self.AcquisitionType = None
         self.BodyPart = None
         self.COLLECTION_CENTER = None
@@ -262,6 +273,14 @@ class Image:
 
     def set_basic_dicom_info(self):
         if self.valid:
+            try:
+                self.PatientPosition = self.dicom.PatientPosition
+            except (AttributeError, TypeError):
+                self.PatientPosition = None
+            try:
+                self.FocalSpot = "x".join(floats_to_strings(self.dicom.FocalSpots))
+            except (AttributeError, TypeError):
+                self.FocalSpot = None
             try:
                 self.kVp = int(np.round(self.dicom.KVP, 0))
             except (AttributeError, TypeError):

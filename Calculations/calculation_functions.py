@@ -218,8 +218,18 @@ def body_perimeter(image):
     return image.body_perimeter
 
 
+def focal_spot(image):
+    return image.FocalSpot
+
+
+def patient_position(image):
+    return image.PatientPosition
+
+
 calculations = {'Channels': channels,
                 'Manufacturer': manufacturer,
+                'Patient Position': patient_position,
+                'Focal Spot (mm)': focal_spot,
                 'Model': model,
                 'Software Version': software_version,
                 'Station': station,
@@ -270,6 +280,8 @@ calculations = {'Channels': channels,
 
 
 image_processing = {'Channels': 'BASIC',
+                    'Focal Spot (mm)': 'BASIC',
+                    'Patient Position': 'BASIC',
                     'Manufacturer': 'BASIC',
                     'Model': 'BASIC',
                     'Software Version': 'BASIC',
