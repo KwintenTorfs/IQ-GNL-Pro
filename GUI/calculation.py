@@ -10,7 +10,6 @@ from Calculations.calculation_functions import calculations, image_processing, i
 from Calculations.Global_Noise import construct_noise_map, global_noise_from_noise_map, standard_slice, \
     get_kernel_in_pixel
 from GUI.calculation_folders_to_files import get_calculable_slices
-from pytictoc import TicToc
 
 from configuration import ROOT_DIR
 
@@ -161,14 +160,12 @@ def process_list_of_image_slices(image_slices, slice_dataframe, hounsfield_range
 
 def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, hounsfield_ranges, save_location_files,
                             save_location_scans, image_param, calculate_gnl, window, save_type):
-    t = TicToc()
     filename = os.path.basename(save_location_scans)
     save_folder = os.path.dirname(save_location_scans)
     temporary_save_location = str(os.path.join(save_folder, 'TEMP ' + filename)).split('.')[0] + '.txt'
     header_scan = list(scan_dataframe.head())
     nb_folders = len(source_paths)
     string_folder = '%%0%id' % len(str(nb_folders))
-    t.tic()
     for i, folder in enumerate(source_paths):
         slices, measurements = get_calculable_slices(folder)
         data = calculate_list_of_image_slices(image_slices=slices,
@@ -188,7 +185,10 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
             for parameter in scan_info.keys():
                 if pre_and_suffix['AVG'] in parameter:
                     original_parameter = parameter.split(pre_and_suffix['AVG'])[1]
-                    parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
+                    try:
+                        parameter_array = np.take(np.array(data[original_parameter]), np.array(measurements[method]))
+                    except IndexError:
+                        continue
                     try:
                         scan_info[pre_and_suffix['AVG'] + original_parameter] = np.nanmean(parameter_array)
                     except (RuntimeWarning, TypeError):
@@ -200,13 +200,18 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
                 elif pre_and_suffix['STD'] in parameter:
                     pass
                 elif parameter == 'Calculation Method':
+
                     scan_info[parameter] = method
                 elif parameter == 'NB Slices':
                     scan_info[parameter] = nb_slices
                 elif parameter == 'Path':
                     scan_info[parameter] = folder
                 else:
-                    scan_info[parameter] = data[parameter][0]
+
+                    try:
+                        scan_info[parameter] = data[parameter][0]
+                    except KeyError:
+                        continue
             scan_dataframe.loc[len(scan_dataframe)] = scan_info.values()
 
             # This is used to have also a temporary file
@@ -218,7 +223,6 @@ def process_list_of_folders(source_paths, slice_dataframe, scan_dataframe, houns
         log(window, '')
         log(window, string_folder % (i + 1) + '/%i  ' % nb_folders + folder + '  PROCESSED')
         log(window, '')
-    t.toc()
     try:
         operations_save[save_type](slice_dataframe, save_location_files)
     except PermissionError:

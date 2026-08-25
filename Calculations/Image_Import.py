@@ -155,7 +155,7 @@ ssde_coefficients = {'Body': [3.704369, 0.03671937], 'Head': [1.874799, 0.038713
 
 
 class Image:
-    minimum_value = -1800
+    minimum_value = -2048
 
     def __init__(self, directory, file, process=True, thresholds=None):
 
@@ -438,6 +438,14 @@ class Image:
             except AttributeError:
                 self.StudyDescription = None
             try:
+                self.RECONSTRUCTION_DIAMETER = self.dicom.ReconstructionDiameter
+            except AttributeError:
+                self.RECONSTRUCTION_DIAMETER = None
+            try:
+                self.COLLECTION_DIAMETER = self.dicom.DataCollectionDiameter
+            except AttributeError:
+                self.COLLECTION_DIAMETER = None
+            try:
                 self.ImageComments = self.dicom.ImageComments
             except AttributeError:
                 self.ImageComments = None
@@ -535,14 +543,7 @@ class Image:
             self.matrix_real_to_coordinate = None
 
         # REAL SPACE COORDINATES
-        try:
-            self.COLLECTION_DIAMETER = self.dicom.DataCollectionDiameter
-        except AttributeError:
-            self.COLLECTION_DIAMETER = None
-        try:
-            self.RECONSTRUCTION_DIAMETER = self.dicom.ReconstructionDiameter
-        except AttributeError:
-            self.RECONSTRUCTION_DIAMETER = None
+
         try:
             self.COLLECTION_CENTER = np.array(self.dicom.DataCollectionCenterPatient)[:-1]
         except AttributeError:
