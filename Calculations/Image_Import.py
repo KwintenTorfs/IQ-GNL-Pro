@@ -12,7 +12,7 @@ from scipy import ndimage
 # Upper bound of lung tissue is taken as -600 =>
 #     https://books.google.be/books?id=IJwZHPrDQYUC&pg=PA379&redir_esc=y#v=onepage&q&f=false
 tissue_hounsfield_units = {'soft': [0, 170], 'bone': [300, np.inf], 'fat': [-300, 0], 'lung': [-np.inf, -600],
-                           'soft_qaelum': [-300, 300]}
+                           'soft_qaelum_old': [-300, 300], 'soft_qaelum_new': [-100, 300]}
 # Threshold list as used in the original Resolution paper by Sanders
 sanders_threshold_list = [-475, -400, -200, -190, -175, -165, -155, -150]
 # Anam (2017) Truncation correction Factor - TP is not in % but from 0-1
