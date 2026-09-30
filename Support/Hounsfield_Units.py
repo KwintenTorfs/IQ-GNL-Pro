@@ -115,11 +115,11 @@ def hu_str2float(low, high):
 
 def hu_float2str(low, high):
     # For use in GUI, we need HU range in string
-    if high == np.infty:
+    if high == np.inf:
         high = infinity
     else:
         high = str(int(high))
-    if low == -np.infty:
+    if low == -np.inf:
         low = '-%s' % infinity
     else:
         low = str(int(low))

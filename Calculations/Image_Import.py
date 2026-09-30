@@ -11,7 +11,7 @@ from scipy import ndimage
 # According to Ahmad (2021) -> take soft tissue upper to be 170, not 100 HU
 # Upper bound of lung tissue is taken as -600 =>
 #     https://books.google.be/books?id=IJwZHPrDQYUC&pg=PA379&redir_esc=y#v=onepage&q&f=false
-tissue_hounsfield_units = {'soft': [0, 170], 'bone': [300, np.infty], 'fat': [-300, 0], 'lung': [-np.infty, -600],
+tissue_hounsfield_units = {'soft': [0, 170], 'bone': [300, np.inf], 'fat': [-300, 0], 'lung': [-np.inf, -600],
                            'soft_qaelum': [-300, 300]}
 # Threshold list as used in the original Resolution paper by Sanders
 sanders_threshold_list = [-475, -400, -200, -190, -175, -165, -155, -150]
