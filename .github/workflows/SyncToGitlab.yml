@@ -3,6 +3,7 @@ name: Mirror GitHub to GitLab
 on:
   push:
 
+
 permissions:
   contents: read
 
