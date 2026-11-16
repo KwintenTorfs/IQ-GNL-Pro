@@ -19,4 +19,5 @@ jobs:
       - name: Mirror to GitLab
         run: |
           git remote add gitlab https://${{ secrets.GITLAB_USERNAME }}:${{ secrets.GITLAB_PAT }}@gitlab.kuleuven.be/medphysqa/deploy/iq-gnl-pro.git
-          git push --mirror gitlab
+          git push gitlab --all
+          git push gitlab --tags
