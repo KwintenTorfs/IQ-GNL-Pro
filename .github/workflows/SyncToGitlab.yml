@@ -16,8 +16,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror to GitLab
+      - name: Configure SSH
         run: |
-          git remote add gitlab https://${{ secrets.GITLAB_USERNAME }}:${{ secrets.GITLAB_PAT }}@gitlab.kuleuven.be/medphysqa/deploy/iq-gnl-pro.git
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan gitlab.kuleuven.be >> ~/.ssh/known_hosts
+
+      - name: Test SSH
+        run: |
+          ssh -T git@gitlab.kuleuven.be || true
+
+      - name: Push to GitLab
+        run: |
+          git remote add gitlab git@gitlab.kuleuven.be:medphysqa/deploy/iq-gnl-pro.git
           git push gitlab --all
           git push gitlab --tags
